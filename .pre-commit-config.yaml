@@ -1,0 +1,24 @@
+repos:
+  - repo: git://github.com/dnephin/pre-commit-golang
+    rev: master
+    hooks:
+      - id: go-fmt
+      - id: go-vet
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.3.0
+    hooks:
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+  - repo: local
+    hooks:
+      - id: check-strings
+        name: check-strings
+        language: script
+        entry: ./scripts/check-strings.sh
+        files: ''
+        exclude: |
+          (?x)^(
+            scripts/check-strings.sh|
+            README.md|
+            LICENSE
+          )$
