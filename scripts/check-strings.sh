@@ -59,7 +59,7 @@ check_everything() {
 
 old_ifs=$IFS
 IFS=,
-MATCH='# TODO,# Todo,# todo,# DEBUG,# Debug,# debug'
+MATCH='// TODO,// Todo,// todo,// DEBUG,// Debug,// debug'
 
 for file in "$@"; do
     for match_pattern in $MATCH; do

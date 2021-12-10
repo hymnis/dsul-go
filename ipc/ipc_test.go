@@ -7,7 +7,7 @@ func TestSomething(t *testing.T) {
 	cases := []struct {
 		in, want string
 	}{
-		{"Hello, world", "Hello, world" },
+		{"Hello, world", "Hello, world"},
 		{"", ""},
 	}
 	for _, c := range cases {
