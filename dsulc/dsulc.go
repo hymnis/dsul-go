@@ -19,14 +19,12 @@ var pkg_version string = "0.0.1-alpha"
 var hardware_info string = ""
 
 func main() {
-	fmt.Println("DSUL CLI")
-
 	cfg := settings.GetSettings()
 	ipc_command := make(chan ipc.Command)
 	ipc_response := make(chan ipc.Command)
 	done := make(chan bool)
 	go ipc.ClientRunner(ipc_command, ipc_response, done) // act on ipc_command's given and send 'done' signal all are sent
-	go handleResponse(ipc_response)                      // handle responses from IPC daemon
+	go handleResponse(cfg, ipc_response)                 // handle responses from IPC daemon
 	handleArguments(cfg, ipc_command)                    // read arguments and send ipc_command's
 	close(ipc_command)                                   // close channel once we are done sending commands
 
@@ -109,9 +107,8 @@ func handleArguments(cfg *settings.Config, ipc_command chan ipc.Command) {
 		os.Exit(0)
 	}
 	if *arg_list {
-		// TODO: get hardware state from daemon, call was made earlier, data should be ready
 		ipc_command <- ipc.Command{"get", "information", "all"} // request information from daemon
-		time.Sleep(time.Second * 1)
+		time.Sleep(time.Second * 1)                             // wait to cmd to be sent and response received and parsed
 		listInformation(cfg)
 		os.Exit(0)
 	}
@@ -160,14 +157,20 @@ func handleArguments(cfg *settings.Config, ipc_command chan ipc.Command) {
 }
 
 // Handle responses from IPC daemon.
-func handleResponse(ipc_response chan ipc.Command) {
-	// ...
+func handleResponse(cfg *settings.Config, ipc_response chan ipc.Command) {
 	for {
 		select {
 		case response := <-ipc_response:
-			fmt.Printf("Response: %v", response) // DEBUG
 			if len(response.Value) > 4 {
+				// Update settings values from hardware limits
 				hardware_info = response.Value
+				hardware_state := *settings.ParseHardwareInformation(hardware_info)
+				if hardware_state.Brightness_min >= 0 {
+					cfg.BrightnessMin = hardware_state.Brightness_min
+				}
+				if hardware_state.Brightness_max > 0 {
+					cfg.BrightnessMax = hardware_state.Brightness_max
+				}
 			}
 		}
 	}

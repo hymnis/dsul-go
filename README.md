@@ -30,14 +30,13 @@ DSUL is a proper Go project and can be built into packages.
 ### Build package(s)
 
 ```
-go build
+go build dsuld/dsuld.go
+go build dsulc/dsulc.go
 ```
 
 ### Install package(s)
 
-```
-go install
-```
+...
 
 
 ## Configuration

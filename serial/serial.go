@@ -21,12 +21,12 @@ func Init(cfg *settings.Config) serial.Port {
 		DataBits: 8,
 		StopBits: serial.OneStopBit,
 	}
-	port, err := serial.Open(cfg.Serial.Port, mode) // TODO: get device from settings and not hardcoded
+	port, err := serial.Open(cfg.Serial.Port, mode)
 	if err != nil {
 		log.Fatalf("Failed to open serial port: %v", err.Error())
 	}
-	port.SetReadTimeout(2 * time.Second)
-	log.Printf("Serial port set: %d_N81", cfg.Serial.Baudrate)
+	port.SetReadTimeout(time.Second * 2)
+	log.Printf("Serial port set: %d_N81", cfg.Serial.Baudrate) // VERBOSE
 	return port
 }
 
@@ -45,7 +45,7 @@ func Read(port serial.Port) string {
 			break
 		}
 
-		log.Printf("Serial Receiving: %s\n%v\n", buff, buff) // DEBUG
+		log.Printf("Serial Receiving: %s\n%v\n", buff, buff) // VERBOSE
 		for _, ch := range buff {
 			output += string(ch)
 			if ch == 35 { // 35 = #
@@ -66,7 +66,7 @@ func Read(port serial.Port) string {
 
 // Write data to serial port.
 func Write(port serial.Port, data []byte) {
-	log.Printf("Serial Sending: %s %v\n", data, data)
+	log.Printf("Serial Sending: %s %v\n", data, data) // VERBOSE
 	_, err := port.Write(data)
 	if err != nil {
 		log.Fatal(err)
@@ -96,7 +96,7 @@ func SendRequest(port serial.Port) string {
 func SendColorCommand(port serial.Port, value string, cfg *settings.Config) bool {
 	command, ok := GetColorString(value, cfg)
 	if ok {
-		log.Printf("Setting color: '%v'", value)
+		log.Printf("Setting color: '%v'", value) // VERBOSE
 		result := performExchange(port, command)
 		return isOK(result)
 	}
@@ -109,7 +109,7 @@ func SendColorCommand(port serial.Port, value string, cfg *settings.Config) bool
 func SendBrightnessCommand(port serial.Port, value string, cfg *settings.Config) bool {
 	command, ok := GetBrightnessString(value, cfg)
 	if ok {
-		log.Printf("Setting brightness: '%v'", value)
+		log.Printf("Setting brightness: '%v'", value) // VERBOSE
 		result := performExchange(port, command)
 		return isOK(result)
 	}
@@ -122,7 +122,7 @@ func SendBrightnessCommand(port serial.Port, value string, cfg *settings.Config)
 func SendModeCommand(port serial.Port, value string, cfg *settings.Config) bool {
 	command, ok := GetModeString(value, cfg)
 	if ok {
-		log.Printf("Setting mode: '%v'", value)
+		log.Printf("Setting mode: '%v'", value) // VERBOSE
 		result := performExchange(port, command)
 		return isOK(result)
 	}
@@ -136,7 +136,7 @@ func SendModeCommand(port serial.Port, value string, cfg *settings.Config) bool 
 func SendDimCommand(port serial.Port, value string) bool {
 	command, ok := GetDimString(value)
 	if ok {
-		log.Printf("Setting dim mode: '%v'", value)
+		log.Printf("Setting dim mode: '%v'", value) // VERBOSE
 		result := performExchange(port, command)
 		return isOK(result)
 	}
@@ -153,7 +153,6 @@ func performExchange(port serial.Port, data string) string {
 
 // Return a bool value indicating if data is (a) OK.
 func isOK(data string) bool {
-	fmt.Printf("isOK input: '%v'\n", data) // DEBUG
 	// TODO: fix proper string checks
 	status := false
 	if len(data) > 0 {
@@ -161,7 +160,6 @@ func isOK(data string) bool {
 			status = true
 		}
 	}
-	fmt.Printf("isOK output: '%v'\n", status) // DEBUG
 	return status
 }
 
@@ -210,7 +208,6 @@ func GetModeString(value string, cfg *settings.Config) (string, bool) {
 	ok := false
 	value_i, _ := strconv.Atoi(value)
 	mode_max := len(cfg.Modes)
-	fmt.Printf("mode_max: %d\n", mode_max) // DEBUG
 
 	if value_i >= 1 && value_i <= mode_max {
 		command = fmt.Sprintf("+m%03d#", value_i)
@@ -238,82 +235,12 @@ func GetDimString(value string) (string, bool) {
 // Handles reading and writing in different goroutines.
 func Runner(cfg *settings.Config, cmd_channel chan string, rsp_channel chan string) {
 	port := Init(cfg)
-	time.Sleep(2 * time.Second) // let device boot properly
+	time.Sleep(time.Second * 2) // let device boot properly
 	_ = SendPing(port)
 
-	// Use either the goroutines below or 'Send*Command' functions, not both at the same time.
-	// 'reader' and 'writer' uses the serial port directly.
-	//serial_to := make(chan string)
-	//go reader(port)
-	//go writer(port, serial_to)
 	go commandHandler(port, cmd_channel, rsp_channel, cfg)
 
-	// <DEBUG
-	// Validate data before sending commands via 'serial_to'.
-	// Using 'Get*String' functions the input i validated and the 'ok' return value indicates if value is acceptable.
-	//bri, bri_ok := GetBrightnessString("50", 10, 120)
-	//if bri_ok {
-	//	serial_to <- bri // "+b050#", brightness: 50
-	//}
-	//time.Sleep(2 * time.Second)
-	//led, led_ok := GetColorString("255:000:000")
-	//if led_ok {
-	//	serial_to <- led // "+l255000000#", led: red
-	//}
-	//mode, mode_ok := GetModeString("2", 4)
-	//if mode_ok {
-	//	serial_to <- mode // "+m002#", mode: 2
-	//}
-	//time.Sleep(3 * time.Second)
-	//mode, mode_ok = GetModeString("1", 4)
-	//if mode_ok {
-	//	serial_to <- mode // "+m001#", mode: 1
-	//}
-	//led, led_ok = GetColorString("000:255:000")
-	//if led_ok {
-	//	serial_to <- led // "+l000255000#", led: green
-	//}
-	// DEBUG>
-
 	select {}
-}
-
-// Reads and reacts to data from the serial port.
-// DEPRECATED
-func reader(port serial.Port) {
-	for {
-		// Get serial input (blocks until data is received or timeout)
-		input := Read(port)
-		if len(input) > 0 {
-			fmt.Printf("Serial Reader got: %s\n", input) // DEBUG
-			if input == "-?#" {
-				log.Print("Serial Response: Ping")
-				_ = SendPing(port)
-			} else if input == "-!#" {
-				log.Print("Serial Response: Resend/Request")
-			} else if input == "+?#" {
-				log.Print("Serial Response: Unknown/Error")
-			} else if input == "+!#" {
-				log.Print("Serial Response: OK")
-			} else {
-				fmt.Println("not sure what we got") // DEBUG
-			}
-		}
-	}
-}
-
-// Writes data to the serial port when received from channel.
-// DEPRECATED
-func writer(port serial.Port, serial_to chan string) {
-	for {
-		select {
-		case data := <-serial_to:
-			fmt.Printf("Serial Writer got: %s\n", data) // DEBUG
-			if len(data) > 0 {
-				Write(port, []byte(data))
-			}
-		}
-	}
 }
 
 func commandHandler(port serial.Port, cmd_channel chan string, rsp_channel chan string, cfg *settings.Config) {

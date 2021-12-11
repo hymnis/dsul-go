@@ -1,5 +1,5 @@
 // DSUL - Disturb State USB Light : dsuld tests.
-package ipc
+package main
 
 import "testing"
 

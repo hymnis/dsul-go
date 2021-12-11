@@ -41,14 +41,9 @@ func serverSend(sc *ipc.Server, out_channel chan Command) {
 		case command := <-out_channel:
 			msg_str := encodeToBytes(command)
 			msg_type := 1 // 0 is reserved
-			err := sc.Write(msg_type, msg_str)
-			if err != nil {
-				fmt.Println("IPC Server: Could not send.") // DEBUG
-				fmt.Println(err)                           // "Not connected", "Listening"
-			}
+			_ = sc.Write(msg_type, msg_str)
+			time.Sleep(time.Second / 30)
 		}
-
-		time.Sleep(time.Second / 30)
 	}
 }
 
@@ -58,7 +53,6 @@ func serverReceive(sc *ipc.Server, cmd_channel chan string, out_channel chan Com
 
 		if err == nil {
 			if m.MsgType > 0 {
-				log.Println("IPC Server recieved: "+string(m.Data)+" - Message type: ", m.MsgType) // DEBUG
 				cmd := decodeToCommand(m.Data)
 				if cmd.Action == "set" {
 					// Send "set" command to cmd_channel (received by serial module)
@@ -114,7 +108,6 @@ func clientSend(cc *ipc.Client, ready chan bool, ipc_command chan Command, done 
 			select {
 			case command, more := <-ipc_command:
 				if more {
-					fmt.Printf("IPC client send: %v\n", command) // DEBUG
 					msg_str := encodeToBytes(command)
 					msg_type := 2 // 0 is reserved
 					_ = cc.Write(msg_type, msg_str)
@@ -149,10 +142,7 @@ func clientReceive(cc *ipc.Client, ready chan bool, ipc_response chan Command) {
 		}
 
 		if m.MsgType > 0 { // all message types above 0 have been recieved over the connection
-			log.Println("IPC Message type: ", m.MsgType)          // DEBUG
-			log.Println("IPC Client recieved: " + string(m.Data)) // DEBUG
 			response := decodeToCommand(m.Data)
-			fmt.Printf("IPC client response: %v\n", response) // DEBUG
 			ipc_response <- response
 		}
 	}

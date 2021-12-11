@@ -18,8 +18,6 @@ var verbose bool = false
 var pkg_version string = "0.0.1-alpha"
 
 func main() {
-	fmt.Println("DSUL Daemon")
-
 	// Get settings and arguments
 	cfg := settings.GetSettings()
 	handleArguments(cfg)

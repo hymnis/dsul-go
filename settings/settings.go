@@ -149,8 +149,6 @@ func ParseHardwareInformation(info string) *Hardware {
 		hardware_info.Brightness_min = brightness_min_i
 		hardware_info.Brightness_max = brightness_max_i
 	}
-	// TODO: fix current_color regexp matching. always returns empty string
-	fmt.Printf("cc_match: %v\n", cc_match) // DEBUG
 	if len(cc_match) > 0 {
 		current_color_red_i, _ := strconv.Atoi(cc_match[1])
 		current_color_green_i, _ := strconv.Atoi(cc_match[2])
