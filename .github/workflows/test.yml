@@ -1,0 +1,67 @@
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+  release:
+    types: [ created ]
+
+jobs:
+  build:
+    strategy:
+     matrix:
+       os: [ ubuntu-latest, windows-latest, macOS-latest ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Build x64
+      run: |
+        GOARCH=amd64 go build -v ./dsuld/dsuld.go
+        GOARCH=amd64 go build -v ./dsulc/dsulc.go
+      shell: bash
+
+    - name: Build x86
+      if: matrix.os != 'macOS-latest'
+      run: |
+        GOARCH=386 go build -v ./dsuld/dsuld.go
+        GOARCH=386 go build -v ./dsulc/dsulc.go
+      shell: bash
+
+    - name: Build arm
+      if: matrix.os != 'macOS-latest'
+      run: |
+        GOARCH=arm go build -v ./dsuld/dsuld.go
+        GOARCH=arm go build -v ./dsulc/dsulc.go
+      shell: bash
+
+    - name: Test
+      run: |
+        go test -v ./dsuld/dsuld.go
+        go test -v ./dsulc/dsulc.go
+
+    - name: Coverage
+      run: |
+        go test ./dsuld/dsuld.go -coverprofile=dsuld-coverage.out
+        go tool cover -html=dsuld-coverage.out -o dsuld-coverage.html
+        go test ./dsulc/dsulc.go -coverprofile=dsulc-coverage.out
+        go tool cover -html=dsulc-coverage.out -o dsulc-coverage.html
+
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage
+        path: ./dsul?-coverage.*

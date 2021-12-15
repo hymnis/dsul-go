@@ -13,11 +13,12 @@ repos:
       - id: check-strings
         name: check-strings
         language: script
-        entry: ./scripts/check-strings.sh
+        entry: ./.scripts/check-strings.sh
         files: ''
         exclude: |
           (?x)^(
-            scripts/check-strings.sh|
+            .scripts/check-strings.sh|
             README.md|
-            LICENSE
+            LICENSE|
+            design.md
           )$

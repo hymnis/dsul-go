@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  build:
+    strategy:
+     matrix:
+       os: [ ubuntu-latest, windows-latest, macOS-latest ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Create artifacts directory
+      run: mkdir -p ./artifacts
+      shell: bash
+
+    - name: Build x64
+      run: |
+        GOARCH=amd64 go build -v -o ./artifacts/dsuld-$RUNNER_ARCH-$RUNNER_OS ./dsuld/dsuld.go
+        GOARCH=amd64 go build -v -o ./artifacts/dsulc-$RUNNER_ARCH-$RUNNER_OS ./dsulc/dsulc.go
+      shell: bash
+
+    - name: Build x86
+      if: matrix.os != 'macOS-latest'
+      run: |
+        GOARCH=386 go build -v -o ./artifacts/dsuld-$RUNNER_ARCH-$RUNNER_OS ./dsuld/dsuld.go
+        GOARCH=386 go build -v -o ./artifacts/dsulc-$RUNNER_ARCH-$RUNNER_OS ./dsulc/dsulc.go
+      shell: bash
+
+    - name: Build arm
+      if: matrix.os != 'macOS-latest'
+      run: |
+        GOARCH=arm go build -v -o ./artifacts/dsuld-$RUNNER_ARCH-$RUNNER_OS ./dsuld/dsuld.go
+        GOARCH=arm go build -v -o ./artifacts/dsulc-$RUNNER_ARCH-$RUNNER_OS ./dsulc/dsulc.go
+      shell: bash
+
+    - name: Test
+      run: |
+        go test -v ./dsuld/dsuld.go
+        go test -v ./dsulc/dsulc.go
+
+    - name: Upload binaries
+      uses: actions/upload-artifact@v2
+      with:
+        name: binaries
+        path: ./artifacts/dsul*
+        if-no-files-found: error

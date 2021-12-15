@@ -16,7 +16,7 @@ The firmware project is available at [hymnis/dsul-arduino](https://github.com/hy
 
 ## Firmware
 
-As both FW (firmware) and SW (software) needs to talk to each other, not all combinations of versions work. Make sure that the FW and SW versions are compatible with each other. The latest (stable) versions usually has the best support. For more information about compatibility, see the [Firmware](https://github.com/hymnis/dsul-arduino/wiki/Firmware) wiki page.
+As both FW (firmware) and SW (software) needs to talk to each other, not all combinations of versions work. Make sure that the FW and SW versions are compatible with each other. The latest (stable) versions usually has the best support. For more information about compatibility, see the [Firmware](https://github.com/hymnis/dsul-go/wiki/Firmware) wiki page.
 
 
 ## Installation (manual)
@@ -27,8 +27,8 @@ DSUL is a proper Go project and can be built into packages.
 ### Build package(s)
 
 ```
-go build dsuld/dsuld.go
-go build dsulc/dsulc.go
+go build ./dsuld/dsuld.go
+go build ./dsulc/dsulc.go
 ```
 
 
@@ -36,7 +36,7 @@ go build dsulc/dsulc.go
 This part handles communication with the hardware (serial connection) and allows clients to send commands.
 
 As module: `go run dsuld.go [arguments]`  
-As package: `dsuld [arguments]`
+As binary: `dsuld [arguments]`
 
 ### Arguments
 
@@ -51,7 +51,7 @@ As package: `dsuld [arguments]`
 Used to communicate with the daemon through IPC.
 
 As module: `go run dsulc.go [arguments]`  
-As package: `dsulc [arguments]`
+As binary: `dsulc [arguments]`
 
 ### Arguments
 
