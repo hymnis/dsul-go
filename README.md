@@ -16,7 +16,7 @@ The firmware project is available at [hymnis/dsul-arduino](https://github.com/hy
 
 ## Firmware
 
-As both FW (firmware) and SW (software) needs to talk to each other, not all combinations of versions work. Make sure that the FW and SW versions are compatible with each other. The latest (stable) versions usually has the best support. For more information about compatibility, see the [Firmware](https://github.com/hymnis/dsul-go/wiki/Firmware) wiki page.
+As both FW (firmware) and SW (software) needs to talk to each other, not all combinations of versions work. Make sure that the FW and SW versions are compatible with each other. The latest (stable) versions usually has the best support. For more information about compatibility, see the [Firmware](https://github.com/hymnis/dsul-arduino/wiki/Firmware) wiki page.
 
 
 ## Installation (manual)
@@ -31,15 +31,6 @@ go build dsuld/dsuld.go
 go build dsulc/dsulc.go
 ```
 
-### Install package(s)
-
-...
-
-
-## Configuration
-
-...
-
 
 ## Daemon, dsuld
 This part handles communication with the hardware (serial connection) and allows clients to send commands.
@@ -49,7 +40,11 @@ As package: `dsuld [arguments]`
 
 ### Arguments
 
-...
+    -h, --help                Show help and usage information.
+    -c, --comport <comport>   The COM port to use. [default: /dev/ttyUSB0]
+    -b, --baudrate <baudrate> The baudrate to use with the COM port. [default: 38400]
+    -v, --version             Show current version.
+    --verbose                 Show more detailed output.
 
 
 ## CLI client, dsulc
@@ -60,7 +55,15 @@ As package: `dsulc [arguments]`
 
 ### Arguments
 
-...
+    -h, --help                     Show help and usage information.
+    -l, --list                     List acceptable values for color, brightness and mode.
+    -c, --color <color>            Set color to given value (must be one of the predefined colors).
+    -b, --brightness <brightness>  Set brightness to given value.
+    -m, --mode <mode>              Set mode to given value (must be on of the predefined modes).
+    -d, --dim                      Turn on color dimming.
+    -u, --undim                    Turn off color dimming.
+    -v, --version                  Show current version.
+    --verbose                      Show more detailed output.
 
 
 ## Development
@@ -88,8 +91,3 @@ To check the code itself we use `go vet`.
 ### pre-commit
 Current configuration will lint and format check as well as check files for strings (like "TODO" and "DEBUG") and missed git merge markings.
 Look in `.pre-commig-config.yaml` for exact order of tasks and their settings.
-
-
-## Acknowledgements
-
-- ...
