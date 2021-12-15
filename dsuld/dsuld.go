@@ -14,8 +14,8 @@ import (
 	"github.com/hymnis/dsul-go/settings"
 )
 
-var verbose bool = false
 var pkg_version string = "0.0.1-alpha"
+var verbose bool = false
 
 func main() {
 	// Get settings and arguments
@@ -25,8 +25,8 @@ func main() {
 	// Start runners
 	cmd_channel := make(chan string) // commands to serial device
 	rsp_channel := make(chan string) // response from serial device
-	go serial.Runner(cfg, cmd_channel, rsp_channel)
-	go ipc.ServerRunner(cmd_channel, rsp_channel)
+	go serial.Runner(cfg, verbose, cmd_channel, rsp_channel)
+	go ipc.ServerRunner(verbose, cmd_channel, rsp_channel)
 
 	select {} // run until user exits
 }
@@ -74,7 +74,7 @@ func handleArguments(cfg *settings.Config) {
 	// Handle arguments
 	if *arg_verbose {
 		verbose = true
-		log.Println("Verbose mode is on")
+		log.Println("[dsuld] Verbose mode is on")
 	}
 	if *arg_version {
 		fmt.Printf("dsuld v%s\n", pkg_version)
@@ -82,13 +82,13 @@ func handleArguments(cfg *settings.Config) {
 	}
 	if *arg_comport != "" {
 		if verbose {
-			log.Printf("Set COM port: %v\n", *arg_comport)
+			log.Printf("[dsuld] Set COM port: %v\n", *arg_comport)
 		}
 		cfg.Serial.Port = *arg_comport
 	}
 	if *arg_baudrate > 0 {
 		if verbose {
-			log.Printf("Set COM port baudrate: %d\n", *arg_baudrate)
+			log.Printf("[dsuld] Set COM port baudrate: %d\n", *arg_baudrate)
 		}
 		cfg.Serial.Baudrate = *arg_baudrate
 	}

@@ -11,6 +11,8 @@ import (
 	ipc "github.com/james-barrow/golang-ipc"
 )
 
+var verbose bool = false
+
 type Command struct {
 	Action string
 	Key    string
@@ -20,7 +22,8 @@ type Command struct {
 // Runner parts //
 
 // Start runner for IPC server.
-func ServerRunner(cmd_channel chan string, rsp_channel chan string) {
+func ServerRunner(verbosity bool, cmd_channel chan string, rsp_channel chan string) {
+	verbose = verbosity
 	sc, err := ipc.StartServer("dsul", nil)
 	if err != nil {
 		log.Println(err)
@@ -42,6 +45,9 @@ func serverSend(sc *ipc.Server, out_channel chan Command) {
 			msg_str := encodeToBytes(command)
 			msg_type := 1 // 0 is reserved
 			_ = sc.Write(msg_type, msg_str)
+			if verbose {
+				log.Printf("[ipc] Server Sent: %v\n", msg_str)
+			}
 			time.Sleep(time.Second / 30)
 		}
 	}
@@ -53,6 +59,9 @@ func serverReceive(sc *ipc.Server, cmd_channel chan string, out_channel chan Com
 
 		if err == nil {
 			if m.MsgType > 0 {
+				if verbose {
+					log.Printf("[ipc] Server Received: %v\n", m.Data)
+				}
 				cmd := decodeToCommand(m.Data)
 				if cmd.Action == "set" {
 					// Send "set" command to cmd_channel (received by serial module)
@@ -68,7 +77,7 @@ func serverReceive(sc *ipc.Server, cmd_channel chan string, out_channel chan Com
 				}
 			}
 		} else {
-			log.Println("IPC error: " + err.Error())
+			log.Println("[ipc] Error: " + err.Error())
 			break
 		}
 	}
@@ -84,7 +93,8 @@ func responseHandler(rsp_channel chan string, out_channel chan Command) {
 	}
 }
 
-func ClientRunner(ipc_command chan Command, ipc_response chan Command, done chan bool) {
+func ClientRunner(verbosity bool, ipc_command chan Command, ipc_response chan Command, done chan bool) {
+	verbose = verbosity
 	conf := &ipc.ClientConfig{
 		Timeout: 5,
 	}
@@ -111,6 +121,9 @@ func clientSend(cc *ipc.Client, ready chan bool, ipc_command chan Command, done 
 					msg_str := encodeToBytes(command)
 					msg_type := 2 // 0 is reserved
 					_ = cc.Write(msg_type, msg_str)
+					if verbose {
+						log.Printf("[ipc] Client Sent: %v\n", msg_str)
+					}
 					time.Sleep(time.Second / 30)
 				} else {
 					done <- true // send done message once all commands are handled and channel is closed
@@ -128,7 +141,7 @@ func clientReceive(cc *ipc.Client, ready chan bool, ipc_response chan Command) {
 		if err != nil {
 			// An error is only returned if the recieved channel has been closed,
 			// so you know the connection has either been intentionally closed or has timmed out waiting to connect/re-connect.
-			log.Fatal("IPC read error: ", err)
+			log.Fatal("[ipc] Error: ", err)
 		}
 
 		if m.MsgType == -1 { // message type -1 is status change
@@ -138,10 +151,13 @@ func clientReceive(cc *ipc.Client, ready chan bool, ipc_response chan Command) {
 		}
 
 		if m.MsgType == -2 { // message type -2 is an error, these won't automatically cause the recieve channel to close.
-			log.Println("IPC Error: " + err.Error())
+			log.Println("[ipc] Error: " + err.Error())
 		}
 
 		if m.MsgType > 0 { // all message types above 0 have been recieved over the connection
+			if verbose {
+				log.Printf("[ipc] Client Received: %v\n", m.Data)
+			}
 			response := decodeToCommand(m.Data)
 			ipc_response <- response
 		}

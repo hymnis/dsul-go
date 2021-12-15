@@ -54,7 +54,7 @@ func GetSettings() *Config {
 	store.Init(applicationName)
 	guaranteeConfigFile()
 	if err := store.Load(configName, &cfg); err != nil {
-		log.Println("Failed to load the DSUL configuration: ", err)
+		log.Fatalln("Failed to load the DSUL configuration: ", err)
 		return nil
 	}
 
@@ -65,7 +65,7 @@ func SaveSettings(cfg *Config) {
 	store.Init(applicationName)
 	guaranteeConfigFile()
 	if err := store.Save(configName, &cfg); err != nil {
-		log.Println("Failed to save the DSUL configuration: ", err)
+		log.Fatalln("Failed to save the DSUL configuration: ", err)
 	}
 }
 

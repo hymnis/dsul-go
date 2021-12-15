@@ -1,8 +1,5 @@
 # DSUL - Disturb State USB Light : Go
 
-[![Build Status](https://travis-ci.com/hymnis/dsul-go.svg?branch=master)](https://travis-ci.com/github/hymnis/dsul-go)
-[![Maintainability](https://api.codeclimate.com/v1/badges/<id>/maintainability)](https://codeclimate.com/github/hymnis/dsul-go/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/<id>/test_coverage)](https://codeclimate.com/github/hymnis/dsul-go/test_coverage)
 [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 The goal of the project is to have a USB connected light, that can be be set to different colors, with adjustable brightness and different modes, which can communicate the users current preference regarding being disturbed.
@@ -50,13 +47,18 @@ This part handles communication with the hardware (serial connection) and allows
 As module: `go run dsuld.go [arguments]`  
 As package: `dsuld [arguments]`
 
-### Options
+### Arguments
 
 ...
 
 
 ## CLI client, dsulc
 Used to communicate with the daemon through IPC.
+
+As module: `go run dsulc.go [arguments]`  
+As package: `dsulc [arguments]`
+
+### Arguments
 
 ...
 
@@ -81,7 +83,7 @@ All Go code should be formatted by `gofmt`. If it's not it will be caught by the
 ### Linting, checks and test
 Tests are located in the module directory. They should be named according to format: `<module name>_test.go`
 
-To check the code itself we use `go vet`, which both checks the code and runs the tests.
+To check the code itself we use `go vet`.
 
 ### pre-commit
 Current configuration will lint and format check as well as check files for strings (like "TODO" and "DEBUG") and missed git merge markings.

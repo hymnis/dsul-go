@@ -14,25 +14,30 @@ import (
 	"github.com/hymnis/dsul-go/settings"
 )
 
-var verbose bool = false
 var pkg_version string = "0.0.1-alpha"
+var verbose bool = false
 var hardware_info string = ""
 
 func main() {
+	// Get settings and cmd_list from arguments
 	cfg := settings.GetSettings()
+	cmd_list := handleArguments(cfg)
+
+	// Start runners
 	ipc_command := make(chan ipc.Command)
 	ipc_response := make(chan ipc.Command)
 	done := make(chan bool)
-	go ipc.ClientRunner(ipc_command, ipc_response, done) // act on ipc_command's given and send 'done' signal all are sent
-	go handleResponse(cfg, ipc_response)                 // handle responses from IPC daemon
-	handleArguments(cfg, ipc_command)                    // read arguments and send ipc_command's
-	close(ipc_command)                                   // close channel once we are done sending commands
+	go ipc.ClientRunner(verbose, ipc_command, ipc_response, done) // act on IPC command's given and send 'done' signal all are sent
+	go handleResponse(cfg, ipc_response)                          // handle responses from IPC daemon
+
+	sendCommands(cmd_list, ipc_command) // send IPC command's (to channel ipc_command)
+	close(ipc_command)                  // close channel once we are done sending commands
 
 	<-done // run until 'done' signal is received
 }
 
-// Parse command line arguments and send IPC commands.
-func handleArguments(cfg *settings.Config, ipc_command chan ipc.Command) {
+// Parse command line arguments and prepare IPC commands.
+func handleArguments(cfg *settings.Config) []ipc.Command {
 	parser := argparse.NewParser("dsulc", "Disturb State USB Light - CLI")
 
 	arg_color := parser.String("c", "color", &argparse.Options{
@@ -98,62 +103,74 @@ func handleArguments(cfg *settings.Config, ipc_command chan ipc.Command) {
 
 	// Handle arguments
 	actions := 0
+	var cmd_list []ipc.Command
+
 	if *arg_verbose {
 		verbose = true
-		log.Println("Verbose mode is on")
+		log.Println("[dsulc] Verbose mode is on")
 	}
 	if *arg_version {
 		fmt.Printf("dsulc v%s\n", pkg_version)
 		os.Exit(0)
 	}
 	if *arg_list {
-		ipc_command <- ipc.Command{"get", "information", "all"} // request information from daemon
-		time.Sleep(time.Second * 1)                             // wait to cmd to be sent and response received and parsed
-		listInformation(cfg)
-		os.Exit(0)
+		if verbose {
+			log.Print("[dsulc] Request information\n")
+		}
+		cmd_list = append(cmd_list, ipc.Command{"get", "information", "all"})
+		actions += 1
 	}
 	if *arg_mode != "" {
 		if verbose {
-			log.Printf("Set mode: %v\n", *arg_mode)
+			log.Printf("[dsulc] Set mode: %v\n", *arg_mode)
 		}
-		ipc_command <- ipc.Command{"set", "mode", *arg_mode}
+		cmd_list = append(cmd_list, ipc.Command{"set", "mode", *arg_mode})
 		actions += 1
 	}
 	if *arg_brightness > 0 {
 		if verbose {
-			log.Printf("Set brightness: %d\n", *arg_brightness)
+			log.Printf("[dsulc] Set brightness: %d\n", *arg_brightness)
 		}
-		ipc_command <- ipc.Command{"set", "brightness", fmt.Sprint(*arg_brightness)}
+		cmd_list = append(cmd_list, ipc.Command{"set", "brightness", fmt.Sprint(*arg_brightness)})
 		actions += 1
 	}
 	if *arg_dim {
 		if verbose {
-			log.Print("Set dim\n")
+			log.Print("[dsulc] Set dim\n")
 		}
-		ipc_command <- ipc.Command{"set", "dim", "true"}
+		cmd_list = append(cmd_list, ipc.Command{"set", "dim", "true"})
 		actions += 1
 	}
 	if *arg_undim {
 		if verbose {
-			log.Print("Set un-dim\n")
+			log.Print("[dsulc] Set un-dim\n")
 		}
-		ipc_command <- ipc.Command{"set", "undim", "true"}
+		cmd_list = append(cmd_list, ipc.Command{"set", "undim", "true"})
 		actions += 1
 	}
 	if *arg_color != "" {
 		if verbose {
-			log.Printf("Set color: %v\n", *arg_color)
+			log.Printf("[dsulc] Set color: %v\n", *arg_color)
 		}
-		ipc_command <- ipc.Command{"set", "color", *arg_color}
+		cmd_list = append(cmd_list, ipc.Command{"set", "color", *arg_color})
 		actions += 1
 	}
 
 	// Handle actions
 	if actions == 0 {
 		fmt.Print(parser.Usage(nil))
-		close(ipc_command)
 		os.Exit(1)
 	}
+
+	return cmd_list
+}
+
+// Send prepared IPC commands to ipc_command channel.
+func sendCommands(cmd_list []ipc.Command, ipc_command chan ipc.Command) {
+	for _, cmd := range cmd_list {
+		ipc_command <- cmd
+	}
+	time.Sleep(time.Second * 1) // give server time to respond
 }
 
 // Handle responses from IPC daemon.
@@ -161,6 +178,9 @@ func handleResponse(cfg *settings.Config, ipc_response chan ipc.Command) {
 	for {
 		select {
 		case response := <-ipc_response:
+			if verbose {
+				log.Printf("[dsulc] IPC Response: %v\n", response.Value)
+			}
 			if len(response.Value) > 4 {
 				// Update settings values from hardware limits
 				hardware_info = response.Value
@@ -171,13 +191,17 @@ func handleResponse(cfg *settings.Config, ipc_response chan ipc.Command) {
 				if hardware_state.Brightness_max > 0 {
 					cfg.BrightnessMax = hardware_state.Brightness_max
 				}
+
+				showInformation(cfg)
+			} else {
+				// ...
 			}
 		}
 	}
 }
 
-// Return information about configuration settings and current hardware values.
-func listInformation(cfg *settings.Config) {
+// Show information about configuration settings and current hardware values.
+func showInformation(cfg *settings.Config) {
 	hardware_state := *settings.ParseHardwareInformation(hardware_info)
 
 	fmt.Println("[modes]")
