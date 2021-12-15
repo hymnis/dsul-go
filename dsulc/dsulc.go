@@ -73,7 +73,7 @@ func handleArguments(cfg *settings.Config) []ipc.Command {
 		Required: false,
 		Validate: func(args []string) error {
 			for _, mode := range args {
-				if n, err := strconv.ParseInt(mode, 10, 64); err != nil || int(n) < cfg.BrightnessMin || int(n) > cfg.BrightnessMax {
+				if n, err := strconv.Atoi(mode); err != nil || int(n) < cfg.BrightnessMin || int(n) > cfg.BrightnessMax {
 					msg := fmt.Sprintf("Brightness must be between %d and %d.", cfg.BrightnessMin, cfg.BrightnessMax)
 					return errors.New(msg)
 				}

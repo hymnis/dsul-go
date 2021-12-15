@@ -30,22 +30,22 @@ jobs:
 
     - name: Build x64
       run: |
-        GOARCH=amd64 go build -v ./dsuld/dsuld.go
-        GOARCH=amd64 go build -v ./dsulc/dsulc.go
+        GOARCH=amd64 go build -v -o dsuld-$RUNNER_ARCH-$RUNNER_OS ./dsuld/dsuld.go
+        GOARCH=amd64 go build -v -o dsulc-$RUNNER_ARCH-$RUNNER_OS ./dsulc/dsulc.go
       shell: bash
 
     - name: Build x86
       if: matrix.os != 'macOS-latest'
       run: |
-        GOARCH=386 go build -v ./dsuld/dsuld.go
-        GOARCH=386 go build -v ./dsulc/dsulc.go
+        GOARCH=386 go build -v -o dsuld-$RUNNER_ARCH-$RUNNER_OS ./dsuld/dsuld.go
+        GOARCH=386 go build -v -o dsulc-$RUNNER_ARCH-$RUNNER_OS ./dsulc/dsulc.go
       shell: bash
 
     - name: Build arm
       if: matrix.os != 'macOS-latest'
       run: |
-        GOARCH=arm go build -v ./dsuld/dsuld.go
-        GOARCH=arm go build -v ./dsulc/dsulc.go
+        GOARCH=arm go build -v -o dsuld-$RUNNER_ARCH-$RUNNER_OS ./dsuld/dsuld.go
+        GOARCH=arm go build -v -o dsulc-$RUNNER_ARCH-$RUNNER_OS ./dsulc/dsulc.go
       shell: bash
 
     - name: Test

@@ -50,7 +50,7 @@ func handleArguments(cfg *settings.Config) {
 		Required: false,
 		Validate: func(args []string) error {
 			for _, baudrate := range args {
-				if n, err := strconv.ParseInt(baudrate, 10, 64); err != nil || int(n) < 9600 || int(n) > 38400 {
+				if n, err := strconv.Atoi(baudrate); err != nil || int(n) < 9600 || int(n) > 38400 {
 					return errors.New("Baudrate is outside allowed range (9600-38400).")
 				}
 			}
