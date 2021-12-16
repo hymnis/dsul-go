@@ -117,42 +117,42 @@ func handleArguments(cfg *settings.Config) []ipc.Command {
 		if verbose {
 			log.Print("[dsulc] Request information\n")
 		}
-		cmd_list = append(cmd_list, ipc.Command{"get", "information", "all"})
+		cmd_list = append(cmd_list, ipc.Command{Action: "get", Key: "information", Value: "all"})
 		actions += 1
 	}
 	if *arg_mode != "" {
 		if verbose {
 			log.Printf("[dsulc] Set mode: %v\n", *arg_mode)
 		}
-		cmd_list = append(cmd_list, ipc.Command{"set", "mode", *arg_mode})
+		cmd_list = append(cmd_list, ipc.Command{Action: "set", Key: "mode", Value: *arg_mode})
 		actions += 1
 	}
 	if *arg_brightness > 0 {
 		if verbose {
 			log.Printf("[dsulc] Set brightness: %d\n", *arg_brightness)
 		}
-		cmd_list = append(cmd_list, ipc.Command{"set", "brightness", fmt.Sprint(*arg_brightness)})
+		cmd_list = append(cmd_list, ipc.Command{Action: "set", Key: "brightness", Value: fmt.Sprint(*arg_brightness)})
 		actions += 1
 	}
 	if *arg_dim {
 		if verbose {
 			log.Print("[dsulc] Set dim\n")
 		}
-		cmd_list = append(cmd_list, ipc.Command{"set", "dim", "true"})
+		cmd_list = append(cmd_list, ipc.Command{Action: "set", Key: "dim", Value: "true"})
 		actions += 1
 	}
 	if *arg_undim {
 		if verbose {
 			log.Print("[dsulc] Set un-dim\n")
 		}
-		cmd_list = append(cmd_list, ipc.Command{"set", "undim", "true"})
+		cmd_list = append(cmd_list, ipc.Command{Action: "set", Key: "undim", Value: "true"})
 		actions += 1
 	}
 	if *arg_color != "" {
 		if verbose {
 			log.Printf("[dsulc] Set color: %v\n", *arg_color)
 		}
-		cmd_list = append(cmd_list, ipc.Command{"set", "color", *arg_color})
+		cmd_list = append(cmd_list, ipc.Command{Action: "set", Key: "color", Value: *arg_color})
 		actions += 1
 	}
 
