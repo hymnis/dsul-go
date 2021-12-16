@@ -1,6 +1,10 @@
 # DSUL - Disturb State USB Light : Go
 
 [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+![release](https://img.shields.io/github/v/release/hymnis/dsul-go?include_prereleases)
+![version](https://img.shields.io/github/go-mod/go-version/hymnis/dsul-go)
+![main test](https://github.com/hymnis/dsul-go/actions/workflows/test.yml/badge.svg?branch=main)
+![main analysis](https://github.com/hymnis/dsul-go/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)
 
 The goal of the project is to have a USB connected light, that can be be set to different colors, with adjustable brightness and different modes, which can communicate the users current preference regarding being disturbed.
 
@@ -21,7 +25,7 @@ As both FW (firmware) and SW (software) needs to talk to each other, not all com
 
 ## Installation (manual)
 
-DSUL is a proper Go project and can be built into packages.
+DSUL aims to be a proper Go project and can be built into packages.
 
 
 ### Build package(s)

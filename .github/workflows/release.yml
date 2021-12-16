@@ -2,7 +2,7 @@ name: Release
 
 on:
   release:
-    types: [ published ]
+    types: [ created ]
 
 jobs:
   build:
@@ -46,8 +46,7 @@ jobs:
 
     - name: Test
       run: |
-        go test -v ./dsuld/dsuld.go
-        go test -v ./dsulc/dsulc.go
+        go test -v ./...
 
     - name: Upload binaries
       uses: actions/upload-artifact@v2
