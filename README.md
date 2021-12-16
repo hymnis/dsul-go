@@ -8,7 +8,7 @@
 
 The goal of the project is to have a USB connected light, that can be be set to different colors, with adjustable brightness and different modes, which can communicate the users current preference regarding being disturbed.
 
-This implementation used Go for both daemon/server and client. It should work on most platforms as it uses as few and standard libraries as possible.
+This implementation uses Go for both daemon/server and client. It should work on most platforms as it uses as few and standard libraries as possible.
 
 
 ## Hardware
@@ -21,6 +21,13 @@ The firmware project is available at [hymnis/dsul-arduino](https://github.com/hy
 ## Firmware
 
 As both FW (firmware) and SW (software) needs to talk to each other, not all combinations of versions work. Make sure that the FW and SW versions are compatible with each other. The latest (stable) versions usually has the best support. For more information about compatibility, see the [Firmware](https://github.com/hymnis/dsul-go/wiki/Firmware) wiki page.
+
+Specifications on the serial protocol and messages can be found in the [firmware](https://github.com/hymnis/dsul-arduino) repository.
+
+
+## Other implementations
+
+There's also a sister project to this one that uses Python instead, called [dsul-python](https://github.com/hymnis/dsul-python). It uses a different approach to IPC and has support for TCP sockets and can work over network but lacks encryption or security.
 
 
 ## Installation (manual)

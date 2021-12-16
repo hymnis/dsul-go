@@ -56,7 +56,10 @@ func Read(port serial.Port) string {
 			log.Printf("[serial] Receiving: '%s' %v\n", buff, buff)
 		}
 		for _, ch := range buff {
-			output += string(ch)
+			if ch != 0 { // ignore 0 (only used as filler in buffer)
+				output += string(ch)
+			}
+
 			if ch == 35 { // 35 = #
 				return output
 			}
