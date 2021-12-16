@@ -49,15 +49,18 @@ jobs:
     - name: Vet
       run: |
         go vet ./...
+      shell: bash
 
     - name: Test
       run: |
         go test -v ./...
+      shell: bash
 
     - name: Coverage
       run: |
         go test -coverprofile=coverage.out ./...
         go tool cover -html=coverage.out -o coverage.html
+      shell: bash
 
     - name: Upload coverage reports
       uses: actions/upload-artifact@v2

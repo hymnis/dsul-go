@@ -47,6 +47,7 @@ jobs:
     - name: Test
       run: |
         go test -v ./...
+      shell: bash
 
     - name: Upload binaries
       uses: actions/upload-artifact@v2
