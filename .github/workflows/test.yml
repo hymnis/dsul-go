@@ -4,68 +4,86 @@ on:
   push:
     branches:
       - main
-      - 'feature/*'
     paths-ignore:
       - '**.md'
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+      - 'feature/*'
     paths-ignore:
       - '**.md'
 
 jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+
+      - name: Vet
+        run: |
+          go vet ./...
+        shell: bash
+
+      - name: Test
+        run: |
+          go test -v ./...
+        shell: bash
+
+      - name: Coverage
+        run: |
+          go test -coverprofile=coverage.out ./...
+          go tool cover -html=coverage.out -o coverage.html
+        shell: bash
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage
+          path: ./coverage.*
+
   build:
+    name: Build
+    needs: test
     strategy:
      matrix:
        os: [ ubuntu-latest, windows-latest, macOS-latest ]
-
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
 
-    - name: Build x64
-      run: |
-        GOARCH=amd64 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsuld/VERSION)" -o dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
-        GOARCH=amd64 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsulc/VERSION)" -o dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
-      shell: bash
+      - name: Build x64
+        run: |
+          GOARCH=amd64 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsuld/VERSION)" -o dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
+          GOARCH=amd64 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsulc/VERSION)" -o dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
+        shell: bash
 
-    - name: Build x86
-      if: matrix.os != 'macOS-latest'
-      run: |
-        GOARCH=386 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsuld/VERSION)" -o dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
-        GOARCH=386 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsulc/VERSION)" -o dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
-      shell: bash
+      - name: Build x86
+        if: matrix.os != 'macOS-latest'
+        run: |
+          GOARCH=386 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsuld/VERSION)" -o dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
+          GOARCH=386 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsulc/VERSION)" -o dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
+        shell: bash
 
-    - name: Build arm
-      if: matrix.os != 'macOS-latest'
-      run: |
-        GOARCH=arm go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsuld/VERSION)" -o dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
-        GOARCH=arm go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsulc/VERSION)" -o dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
-      shell: bash
+      - name: Build arm
+        if: matrix.os != 'macOS-latest'
+        run: |
+          GOARCH=arm go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsuld/VERSION)" -o dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
+          GOARCH=arm go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsulc/VERSION)" -o dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
+        shell: bash
 
-    - name: Vet
-      run: |
-        go vet ./...
-      shell: bash
-
-    - name: Test
-      run: |
-        go test -v ./...
-      shell: bash
-
-    - name: Coverage
-      run: |
-        go test -coverprofile=coverage.out ./...
-        go tool cover -html=coverage.out -o coverage.html
-      shell: bash
-
-    - name: Upload coverage reports
-      uses: actions/upload-artifact@v2
-      with:
-        name: coverage
-        path: ./coverage.*
+      - name: Finish
+        run: |
+          echo ":rocket: Build complete!" >> $GITHUB_STEP_SUMMARY
