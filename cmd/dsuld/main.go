@@ -14,7 +14,7 @@ import (
 	"github.com/hymnis/dsul-go/internal/settings"
 )
 
-var pkg_version string
+var pkg_version string = "0.0.0"
 var verbose bool = false
 
 func main() {

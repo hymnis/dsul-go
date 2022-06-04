@@ -37,18 +37,16 @@ DSUL aims to be a proper Go project and can be built into packages.
 
 ### Build package(s)
 
-Replace `0.0.0` with the actual version number to set application version.
-
-```
-go build -ldflags "-X main.pkg_version=0.0.0" -o dsuld ./cmd/dsuld/main.go
-go build -ldflags "-X main.pkg_version=0.0.0" -o dsulc ./cmd/dsulc/main.go
+```bash
+go build -ldflags "-X main.pkg_version=$(head -1 ./cmd/dsuld/VERSION)" -o dsuld ./cmd/dsuld/main.go
+go build -ldflags "-X main.pkg_version=$(head -1 ./cmd/dsulc/VERSION)" -o dsulc ./cmd/dsulc/main.go
 ```
 
 
 ## Daemon, dsuld
 This part handles communication with the hardware (serial connection) and allows clients to send commands.
 
-As module: `go run dsuld.go [arguments]`  
+As module: `go run ./cmd/dsuld/main.go [arguments]`  
 As binary: `dsuld [arguments]`
 
 ### Arguments
@@ -63,7 +61,7 @@ As binary: `dsuld [arguments]`
 ## CLI client, dsulc
 Used to communicate with the daemon through IPC.
 
-As module: `go run dsulc.go [arguments]`  
+As module: `go run ./cmd/dsulc/main.go [arguments]`  
 As binary: `dsulc [arguments]`
 
 ### Arguments
