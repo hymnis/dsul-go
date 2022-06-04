@@ -9,9 +9,8 @@ import (
 	"time"
 
 	"go.bug.st/serial"
-
-	"github.com/hymnis/dsul-go/settings"
-	"github.com/hymnis/dsul-go/watchdog"
+	"github.com/hymnis/dsul-go/internal/settings"
+	"github.com/hymnis/dsul-go/internal/watchdog"
 )
 
 var verbose bool = false

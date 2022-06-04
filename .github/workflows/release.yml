@@ -20,33 +20,33 @@ jobs:
       with:
         go-version: 1.17
 
+    - name: Test
+      run: |
+        go test -v ./...
+      shell: bash
+
     - name: Create artifacts directory
       run: mkdir -p ./artifacts
       shell: bash
 
     - name: Build x64
       run: |
-        GOARCH=amd64 go build -v -o ./artifacts/dsuld-$RUNNER_ARCH-$RUNNER_OS ./dsuld/dsuld.go
-        GOARCH=amd64 go build -v -o ./artifacts/dsulc-$RUNNER_ARCH-$RUNNER_OS ./dsulc/dsulc.go
+        GOARCH=amd64 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsuld/VERSION)" -o ./artifacts/dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
+        GOARCH=amd64 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsulc/VERSION)" -o ./artifacts/dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
       shell: bash
 
     - name: Build x86
       if: matrix.os != 'macOS-latest'
       run: |
-        GOARCH=386 go build -v -o ./artifacts/dsuld-$RUNNER_ARCH-$RUNNER_OS ./dsuld/dsuld.go
-        GOARCH=386 go build -v -o ./artifacts/dsulc-$RUNNER_ARCH-$RUNNER_OS ./dsulc/dsulc.go
+        GOARCH=386 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsuld/VERSION)" -o ./artifacts/dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
+        GOARCH=386 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsulc/VERSION)" -o ./artifacts/dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
       shell: bash
 
     - name: Build arm
       if: matrix.os != 'macOS-latest'
       run: |
-        GOARCH=arm go build -v -o ./artifacts/dsuld-$RUNNER_ARCH-$RUNNER_OS ./dsuld/dsuld.go
-        GOARCH=arm go build -v -o ./artifacts/dsulc-$RUNNER_ARCH-$RUNNER_OS ./dsulc/dsulc.go
-      shell: bash
-
-    - name: Test
-      run: |
-        go test -v ./...
+        GOARCH=arm go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsuld/VERSION)" -o ./artifacts/dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
+        GOARCH=arm go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsulc/VERSION)" -o ./artifacts/dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
       shell: bash
 
     - name: Upload binaries

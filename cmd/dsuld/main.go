@@ -9,12 +9,12 @@ import (
 	"strconv"
 
 	"github.com/akamensky/argparse"
-	"github.com/hymnis/dsul-go/ipc"
-	"github.com/hymnis/dsul-go/serial"
-	"github.com/hymnis/dsul-go/settings"
+	"github.com/hymnis/dsul-go/internal/ipc"
+	"github.com/hymnis/dsul-go/internal/serial"
+	"github.com/hymnis/dsul-go/internal/settings"
 )
 
-var pkg_version string = "0.0.1-alpha"
+var pkg_version string
 var verbose bool = false
 
 func main() {
