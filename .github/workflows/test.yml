@@ -34,7 +34,8 @@ jobs:
 
       - name: Test
         run: |
-          go test -v ./... >> $GITHUB_STEP_SUMMARY
+          TESTRESULT=$(go test -v ./...)
+          echo "$TESTRESULT" >> $GITHUB_STEP_SUMMARY
         shell: bash
 
       - name: Coverage
