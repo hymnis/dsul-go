@@ -1,1 +1,60 @@
-todo.md
+# Temporary design documents and notes
+todo*.md
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/dsulc
+/cmd/dculc/dculc
+/dsuld
+/cmd/dsuld/dsuld
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of gotestsum --junitfile report.xml
+/report.xml
+
+# Output of the go coverage tool
+*.out
+*.coverage
+coverage.*
+
+# Dependency directories (remove the comment below to include it)
+vendor/
+
+# Editor / IDE
+.vim/
+
+# Archives
+*.zip
+*.tar.gz
+*.tar.bz2
+
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
+# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# AWS User-specific
+.idea/**/aws.xml
+
+# Generated files
+.idea/**/contentModel.xml
+
+# Sensitive or high-churn files
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml

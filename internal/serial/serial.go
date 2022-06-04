@@ -8,10 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hymnis/dsul-go/internal/settings"
+	"github.com/hymnis/dsul-go/internal/watchdog"
 	"go.bug.st/serial"
-
-	"github.com/hymnis/dsul-go/settings"
-	"github.com/hymnis/dsul-go/watchdog"
 )
 
 var verbose bool = false

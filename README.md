@@ -37,9 +37,11 @@ DSUL aims to be a proper Go project and can be built into packages.
 
 ### Build package(s)
 
+Replace `0.0.0` with the actual version number to set application version.
+
 ```
-go build ./dsuld/dsuld.go
-go build ./dsulc/dsulc.go
+go build -ldflags "-X main.pkg_version=0.0.0" -o dsuld ./cmd/dsuld/main.go
+go build -ldflags "-X main.pkg_version=0.0.0" -o dsulc ./cmd/dsulc/main.go
 ```
 
 
