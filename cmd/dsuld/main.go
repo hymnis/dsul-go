@@ -14,8 +14,12 @@ import (
 	"github.com/hymnis/dsul-go/internal/settings"
 )
 
-var pkg_version string = "0.0.0"
-var verbose bool = false
+var (
+	version   string = "0.0.0"
+	sha1      string
+	buildTime string
+	verbose   bool = false
+)
 
 func main() {
 	// Get settings and arguments
@@ -26,7 +30,7 @@ func main() {
 	cmd_channel := make(chan string) // commands to serial device
 	rsp_channel := make(chan string) // response from serial device
 	go serial.Runner(cfg, verbose, cmd_channel, rsp_channel)
-	go ipc.ServerRunner(verbose, cmd_channel, rsp_channel)
+	go ipc.ServerRunner(cfg, verbose, cmd_channel, rsp_channel)
 
 	select {} // run until user exits
 }
@@ -57,6 +61,17 @@ func handleArguments(cfg *settings.Config) {
 			return nil
 		},
 		Help: "Set COM port baudrate"})
+	arg_password := parser.String("p", "password", &argparse.Options{
+		Required: false,
+		Validate: func(args []string) error {
+			for _, password := range args {
+				if len(password) > 0 {
+					return nil
+				}
+			}
+			return errors.New("Password can't be empty.")
+		},
+		Help: "Set password"})
 	arg_version := parser.Flag("v", "version", &argparse.Options{
 		Required: false,
 		Help:     "Show version"})
@@ -77,7 +92,7 @@ func handleArguments(cfg *settings.Config) {
 		log.Println("[dsuld] Verbose mode is on")
 	}
 	if *arg_version {
-		fmt.Printf("dsuld v%s\n", pkg_version)
+		fmt.Printf("dsuld v%s\n", version)
 		os.Exit(0)
 	}
 	if *arg_comport != "" {
@@ -91,5 +106,11 @@ func handleArguments(cfg *settings.Config) {
 			log.Printf("[dsuld] Set COM port baudrate: %d\n", *arg_baudrate)
 		}
 		cfg.Serial.Baudrate = *arg_baudrate
+	}
+	if *arg_password != "" {
+		if verbose {
+			log.Print("[dsuld] Using password authentication.\n")
+		}
+		cfg.Password = *arg_password
 	}
 }
