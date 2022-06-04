@@ -34,8 +34,7 @@ jobs:
 
       - name: Test
         run: |
-          TESTRESULT=$(go test -v ./...)
-          echo "$TESTRESULT" >> $GITHUB_STEP_SUMMARY
+          go test -v ./...
         shell: bash
 
       - name: Coverage
@@ -85,3 +84,7 @@ jobs:
           GOARCH=arm go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsuld/VERSION)" -o dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
           GOARCH=arm go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsulc/VERSION)" -o dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
         shell: bash
+
+      - name: Finish
+        run: |
+          echo ":rocket: Build complete!" >> $GITHUB_STEP_SUMMARY
