@@ -14,9 +14,13 @@ import (
 	"github.com/hymnis/dsul-go/internal/settings"
 )
 
-var pkg_version string = "0.0.0"
-var verbose bool = false
-var hardware_info string = ""
+var (
+	version       string = "0.0.0"
+	sha1          string
+	buildTime     string
+	verbose       bool   = false
+	hardware_info string = ""
+)
 
 func main() {
 	// Get settings and cmd_list from arguments
@@ -27,8 +31,8 @@ func main() {
 	ipc_command := make(chan ipc.Command)
 	ipc_response := make(chan ipc.Command)
 	done := make(chan bool)
-	go ipc.ClientRunner(verbose, ipc_command, ipc_response, done) // act on IPC command's given and send 'done' signal all are sent
-	go handleResponse(cfg, ipc_response)                          // handle responses from IPC daemon
+	go ipc.ClientRunner(cfg, verbose, ipc_command, ipc_response, done) // act on IPC command's given and send 'done' signal all are sent
+	go handleResponse(cfg, ipc_response)                               // handle responses from IPC daemon
 
 	sendCommands(cmd_list, ipc_command) // send IPC command's (to channel ipc_command)
 	close(ipc_command)                  // close channel once we are done sending commands
@@ -87,6 +91,17 @@ func handleArguments(cfg *settings.Config) []ipc.Command {
 	arg_undim := parser.Flag("u", "undim", &argparse.Options{
 		Required: false,
 		Help:     "Un-dim colors"})
+	arg_password := parser.String("p", "password", &argparse.Options{
+		Required: false,
+		Validate: func(args []string) error {
+			for _, password := range args {
+				if len(password) > 0 {
+					return nil
+				}
+			}
+			return errors.New("Password can't be empty.")
+		},
+		Help: "Set password"})
 	arg_version := parser.Flag("v", "version", &argparse.Options{
 		Required: false,
 		Help:     "Show version"})
@@ -110,8 +125,14 @@ func handleArguments(cfg *settings.Config) []ipc.Command {
 		log.Println("[dsulc] Verbose mode is on")
 	}
 	if *arg_version {
-		fmt.Printf("dsulc v%s\n", pkg_version)
+		fmt.Printf("dsulc v%s\n", version)
 		os.Exit(0)
+	}
+	if *arg_password != "" {
+		if verbose {
+			log.Print("[dsulc] Using password authentication.\n")
+		}
+		cfg.Password = *arg_password
 	}
 	if *arg_list {
 		if verbose {

@@ -35,6 +35,7 @@ type Config struct {
 	BrightnessMin int
 	BrightnessMax int
 	Serial        Serial
+	Password      string
 }
 
 type Hardware struct {
@@ -93,6 +94,7 @@ func getDefaults() Config {
 		BrightnessMin: 0,
 		BrightnessMax: 150,
 		Serial:        Serial{"/dev/ttyUSB0", 38400},
+		Password:      "",
 	}
 	return config
 }

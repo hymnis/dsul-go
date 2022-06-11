@@ -38,8 +38,8 @@ DSUL aims to be a proper Go project and can be built into packages.
 ### Build package(s)
 
 ```bash
-go build -ldflags "-X main.pkg_version=$(head -1 ./cmd/dsuld/VERSION)" -o dsuld ./cmd/dsuld/main.go
-go build -ldflags "-X main.pkg_version=$(head -1 ./cmd/dsulc/VERSION)" -o dsulc ./cmd/dsulc/main.go
+go build -ldflags "-X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o dsuld ./cmd/dsuld/main.go
+go build -ldflags "-X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o dsulc ./cmd/dsulc/main.go
 ```
 
 

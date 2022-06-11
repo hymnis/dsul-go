@@ -32,22 +32,22 @@ jobs:
 
     - name: Build x64
       run: |
-        GOARCH=amd64 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsuld/VERSION)" -o ./artifacts/dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
-        GOARCH=amd64 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsulc/VERSION)" -o ./artifacts/dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
+        GOARCH=amd64 go build -v -ldflags "-X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
+        GOARCH=amd64 go build -v -ldflags "-X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
       shell: bash
 
     - name: Build x86
       if: matrix.os != 'macOS-latest'
       run: |
-        GOARCH=386 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsuld/VERSION)" -o ./artifacts/dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
-        GOARCH=386 go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsulc/VERSION)" -o ./artifacts/dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
+        GOARCH=386 go build -v -ldflags "-X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
+        GOARCH=386 go build -v -ldflags "-X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
       shell: bash
 
     - name: Build arm
       if: matrix.os != 'macOS-latest'
       run: |
-        GOARCH=arm go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsuld/VERSION)" -o ./artifacts/dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
-        GOARCH=arm go build -v -ldflags "-X main.pkg_version=$(head -1 cmd/dsulc/VERSION)" -o ./artifacts/dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
+        GOARCH=arm go build -v -ldflags "-X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsuld-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsuld/main.go
+        GOARCH=arm go build -v -ldflags "-X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsulc-$RUNNER_ARCH-$RUNNER_OS ./cmd/dsulc/main.go
       shell: bash
 
     - name: Upload binaries
