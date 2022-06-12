@@ -46,16 +46,20 @@ go build -ldflags "-X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$
 ## Daemon, dsuld
 This part handles communication with the hardware (serial connection) and allows clients to send commands.
 
+If password is set (`-p <password>`) then all clients are required to supply the password when sending commands.
+Message that does not supply the correct password will be ignored.
+
 As module: `go run ./cmd/dsuld/main.go [arguments]`  
 As binary: `dsuld [arguments]`
 
 ### Arguments
 
-    -h, --help                Show help and usage information.
-    -c, --comport <comport>   The COM port to use. [default: /dev/ttyUSB0]
-    -b, --baudrate <baudrate> The baudrate to use with the COM port. [default: 38400]
-    -v, --version             Show current version.
-    --verbose                 Show more detailed output.
+    -h, --help                 Show help and usage information.
+    -c, --comport <comport>    The COM port to use. [default: /dev/ttyUSB0]
+    -b, --baudrate <baudrate>  The baudrate to use with the COM port. [default: 38400]
+    -p  --password <password>  Set password.
+    -v, --version              Show current version.
+    --verbose                  Show more detailed output.
 
 
 ## CLI client, dsulc
@@ -73,6 +77,7 @@ As binary: `dsulc [arguments]`
     -m, --mode <mode>              Set mode to given value (must be on of the predefined modes).
     -d, --dim                      Turn on color dimming.
     -u, --undim                    Turn off color dimming.
+    -p  --password <password>      Set password.
     -v, --version                  Show current version.
     --verbose                      Show more detailed output.
 
