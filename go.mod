@@ -2,15 +2,16 @@ module github.com/hymnis/dsul-go
 
 go 1.17
 
+require go.bug.st/serial v1.3.3
+
 require (
-	go.bug.st/serial v1.3.3
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/akamensky/argparse v1.3.1 // indirect
 	github.com/creack/goselect v0.1.2 // indirect
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/james-barrow/golang-ipc v0.0.0-20210227130457-95e7cc81f5e2 // indirect
+	github.com/james-barrow/golang-ipc v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.1 // indirect
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/pelletier/go-toml v1.2.0 // indirect
