@@ -6,12 +6,18 @@ on:
       - main
     paths-ignore:
       - '**.md'
+      - '**.sh'
+      - '**.yml'
+      - '**.yaml'
   pull_request:
     branches:
       - main
       - 'feature/*'
     paths-ignore:
       - '**.md'
+      - '**.sh'
+      - '**.yml'
+      - '**.yaml'
   workflow_dispatch:
 
 jobs:
