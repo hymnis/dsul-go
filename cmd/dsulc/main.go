@@ -28,20 +28,20 @@ func main() {
 	cmd_list := handleArguments(cfg)
 
 	// Start runners
-	ipc_command := make(chan ipc.Command)
-	ipc_response := make(chan ipc.Command)
+	ipc_message := make(chan ipc.Message)
+	ipc_response := make(chan ipc.Message)
 	done := make(chan bool)
-	go ipc.ClientRunner(cfg, verbose, ipc_command, ipc_response, done) // act on IPC command's given and send 'done' signal all are sent
+	go ipc.ClientRunner(cfg, verbose, ipc_message, ipc_response, done) // act on IPC message's given and send 'done' signal all are sent
 	go handleResponse(cfg, ipc_response)                               // handle responses from IPC daemon
 
-	sendCommands(cmd_list, ipc_command) // send IPC command's (to channel ipc_command)
-	close(ipc_command)                  // close channel once we are done sending commands
+	sendMessages(cmd_list, ipc_message) // send IPC message's (to channel ipc_message)
+	close(ipc_message)                  // close channel once we are done sending messages
 
 	<-done // run until 'done' signal is received
 }
 
-// Parse command line arguments and prepare IPC commands.
-func handleArguments(cfg *settings.Config) []ipc.Command {
+// Parse command line arguments and prepare IPC messages.
+func handleArguments(cfg *settings.Config) []ipc.Message {
 	parser := argparse.NewParser("dsulc", "Disturb State USB Light - CLI")
 
 	arg_color := parser.String("c", "color", &argparse.Options{
@@ -118,7 +118,7 @@ func handleArguments(cfg *settings.Config) []ipc.Command {
 
 	// Handle arguments
 	actions := 0
-	var cmd_list []ipc.Command
+	var cmd_list []ipc.Message
 
 	if *arg_verbose {
 		verbose = true
@@ -138,42 +138,42 @@ func handleArguments(cfg *settings.Config) []ipc.Command {
 		if verbose {
 			log.Print("[dsulc] Request information\n")
 		}
-		cmd_list = append(cmd_list, ipc.Command{Action: "get", Key: "information", Value: "all"})
+		cmd_list = append(cmd_list, ipc.Message{Type: "get", Key: "information", Value: "all", Secret: cfg.Password})
 		actions += 1
 	}
 	if *arg_mode != "" {
 		if verbose {
 			log.Printf("[dsulc] Set mode: %v\n", *arg_mode)
 		}
-		cmd_list = append(cmd_list, ipc.Command{Action: "set", Key: "mode", Value: *arg_mode})
+		cmd_list = append(cmd_list, ipc.Message{Type: "set", Key: "mode", Value: *arg_mode, Secret: cfg.Password})
 		actions += 1
 	}
 	if *arg_brightness > 0 {
 		if verbose {
 			log.Printf("[dsulc] Set brightness: %d\n", *arg_brightness)
 		}
-		cmd_list = append(cmd_list, ipc.Command{Action: "set", Key: "brightness", Value: fmt.Sprint(*arg_brightness)})
+		cmd_list = append(cmd_list, ipc.Message{Type: "set", Key: "brightness", Value: fmt.Sprint(*arg_brightness), Secret: cfg.Password})
 		actions += 1
 	}
 	if *arg_dim {
 		if verbose {
 			log.Print("[dsulc] Set dim\n")
 		}
-		cmd_list = append(cmd_list, ipc.Command{Action: "set", Key: "dim", Value: "true"})
+		cmd_list = append(cmd_list, ipc.Message{Type: "set", Key: "dim", Value: "true", Secret: cfg.Password})
 		actions += 1
 	}
 	if *arg_undim {
 		if verbose {
 			log.Print("[dsulc] Set un-dim\n")
 		}
-		cmd_list = append(cmd_list, ipc.Command{Action: "set", Key: "undim", Value: "true"})
+		cmd_list = append(cmd_list, ipc.Message{Type: "set", Key: "undim", Value: "true", Secret: cfg.Password})
 		actions += 1
 	}
 	if *arg_color != "" {
 		if verbose {
 			log.Printf("[dsulc] Set color: %v\n", *arg_color)
 		}
-		cmd_list = append(cmd_list, ipc.Command{Action: "set", Key: "color", Value: *arg_color})
+		cmd_list = append(cmd_list, ipc.Message{Type: "set", Key: "color", Value: *arg_color, Secret: cfg.Password})
 		actions += 1
 	}
 
@@ -186,16 +186,16 @@ func handleArguments(cfg *settings.Config) []ipc.Command {
 	return cmd_list
 }
 
-// Send prepared IPC commands to ipc_command channel.
-func sendCommands(cmd_list []ipc.Command, ipc_command chan ipc.Command) {
+// Send prepared IPC messages to ipc_message channel.
+func sendMessages(cmd_list []ipc.Message, ipc_message chan ipc.Message) {
 	for _, cmd := range cmd_list {
-		ipc_command <- cmd
+		ipc_message <- cmd
 	}
 	time.Sleep(time.Second * 1) // give server time to respond
 }
 
 // Handle responses from IPC daemon.
-func handleResponse(cfg *settings.Config, ipc_response chan ipc.Command) {
+func handleResponse(cfg *settings.Config, ipc_response chan ipc.Message) {
 	for {
 		select {
 		case response := <-ipc_response:

@@ -13,12 +13,12 @@ import (
 )
 
 var verbose bool = false
-var unlocked bool = true
 
-type Command struct {
-	Action string
+type Message struct {
+	Type   string
 	Key    string
 	Value  string
+	Secret string
 }
 
 // Runner parts //
@@ -32,19 +32,19 @@ func ServerRunner(cfg *settings.Config, verbosity bool, cmd_channel chan string,
 		return
 	}
 
-	out_channel := make(chan Command) // sent over IPC, in 'serverSend'
+	out_channel := make(chan Message) // sent over IPC, in 'serverSend'
 	go responseHandler(rsp_channel, out_channel)
-	go serverReceive(sc, cmd_channel, out_channel, cfg.Password)
+	go serverReceive(cfg, sc, cmd_channel, out_channel)
 	go serverSend(sc, out_channel)
 
 	select {}
 }
 
-func serverSend(sc *ipc.Server, out_channel chan Command) {
+func serverSend(sc *ipc.Server, out_channel chan Message) {
 	for {
 		select {
-		case command := <-out_channel:
-			msg_str := encodeToBytes(command)
+		case message := <-out_channel:
+			msg_str := encodeToBytes(message)
 			msg_type := 2 // 2 == data
 			_ = sc.Write(msg_type, msg_str)
 			if verbose {
@@ -55,42 +55,35 @@ func serverSend(sc *ipc.Server, out_channel chan Command) {
 	}
 }
 
-func serverReceive(sc *ipc.Server, cmd_channel chan string, out_channel chan Command, password string) {
+func serverReceive(cfg *settings.Config, sc *ipc.Server, cmd_channel chan string, out_channel chan Message) {
 	for {
 		m, err := sc.Read()
 
 		if err == nil {
-			if m.MsgType == 1 && password != "" {
+			if m.MsgType == 1 {
 				if verbose {
 					log.Printf("[ipc] Server Received, auth: %v\n", m.Data)
 				}
-				in_password := decodeToString(m.Data)
-				if in_password == password {
-					if verbose {
-						log.Println("[ipc] Authentication successful.")
-					}
-					unlocked = true
-				} else {
-					if verbose {
-						log.Println("[ipc] Authentication failed.")
-					}
-					unlocked = false
-				}
 			}
-			if m.MsgType == 2 && unlocked {
+			if m.MsgType == 2 {
 				if verbose {
 					log.Printf("[ipc] Server Received, data: %v\n", m.Data)
 				}
-				cmd := decodeToCommand(m.Data)
-				if cmd.Action == "set" {
-					// Send "set" command to cmd_channel (received by serial module)
-					cmd_channel <- fmt.Sprintf("%s:%s", cmd.Key, cmd.Value)
-				} else if cmd.Action == "get" {
-					// Get and return information (to IPC client)
-					if cmd.Key == "information" {
-						if cmd.Value == "all" {
-							// Request hardware state, returned via rsp_channel
-							cmd_channel <- fmt.Sprintf("%s:%s", cmd.Key, cmd.Value)
+				cmd := decodeToMessage(m.Data)
+				// Authentication if needed
+				if cfg.Password != "" && cfg.Password != cmd.Secret {
+					log.Printf("[ipc] Server Authentication failed\n")
+				} else {
+					if cmd.Type == "set" {
+						// Send "set" message to cmd_channel (received by serial module)
+						cmd_channel <- fmt.Sprintf("%s:%s", cmd.Key, cmd.Value)
+					} else if cmd.Type == "get" {
+						// Get and return information (to IPC client)
+						if cmd.Key == "information" {
+							if cmd.Value == "all" {
+								// Request hardware state, returned via rsp_channel
+								cmd_channel <- fmt.Sprintf("%s:%s", cmd.Key, cmd.Value)
+							}
 						}
 					}
 				}
@@ -103,16 +96,16 @@ func serverReceive(sc *ipc.Server, cmd_channel chan string, out_channel chan Com
 }
 
 // Handles responses from serial device.
-func responseHandler(rsp_channel chan string, out_channel chan Command) {
+func responseHandler(rsp_channel chan string, out_channel chan Message) {
 	for {
 		select {
 		case response := <-rsp_channel:
-			out_channel <- Command{"set", "response", response} // action, key, value
+			out_channel <- Message{"set", "response", response, ""} // action, key, value, secret
 		}
 	}
 }
 
-func ClientRunner(cfg *settings.Config, verbosity bool, ipc_command chan Command, ipc_response chan Command, done chan bool) {
+func ClientRunner(cfg *settings.Config, verbosity bool, ipc_message chan Message, ipc_response chan Message, done chan bool) {
 	verbose = verbosity
 	conf := &ipc.ClientConfig{
 		Timeout: 5,
@@ -125,30 +118,20 @@ func ClientRunner(cfg *settings.Config, verbosity bool, ipc_command chan Command
 
 	ready := make(chan bool) // used to determine when ready to send in 'clientSend'
 	go clientReceive(cc, ready, ipc_response)
-	go clientSend(cc, ready, ipc_command, done, cfg.Password)
+	go clientSend(cc, ready, ipc_message, done)
 
 	select {}
 }
 
-func clientSend(cc *ipc.Client, ready chan bool, ipc_command chan Command, done chan bool, password string) {
+func clientSend(cc *ipc.Client, ready chan bool, ipc_message chan Message, done chan bool) {
 	select {
 	case <-ready:
 		for {
 			select {
-			case command, more := <-ipc_command:
+			case message, more := <-ipc_message:
 				if more { // channel is open and more data will come
-					// Auth
-					if password != "" {
-						msg_str := encodeToBytes(password)
-						msg_type := 1 // 1 == auth
-						_ = cc.Write(msg_type, msg_str)
-						if verbose {
-							log.Printf("[ipc] Client Sent, auth: %v\n", msg_str)
-						}
-					}
-
 					// Data
-					msg_str := encodeToBytes(command)
+					msg_str := encodeToBytes(message)
 					msg_type := 2 // 2 == data
 					_ = cc.Write(msg_type, msg_str)
 					if verbose {
@@ -156,7 +139,7 @@ func clientSend(cc *ipc.Client, ready chan bool, ipc_command chan Command, done 
 					}
 					time.Sleep(time.Second / 30)
 				} else { // channel has been closed by client
-					done <- true // send done message once all commands are handled and channel is closed
+					done <- true // send done message once all messages are handled and channel is closed
 					return       // exit functions since we are all done
 				}
 			}
@@ -164,7 +147,7 @@ func clientSend(cc *ipc.Client, ready chan bool, ipc_command chan Command, done 
 	}
 }
 
-func clientReceive(cc *ipc.Client, ready chan bool, ipc_response chan Command) {
+func clientReceive(cc *ipc.Client, ready chan bool, ipc_response chan Message) {
 	for {
 		m, err := cc.Read()
 
@@ -191,11 +174,11 @@ func clientReceive(cc *ipc.Client, ready chan bool, ipc_response chan Command) {
 			}
 		}
 
-		if m.MsgType == 2 { // message type 2 is data (commands)
+		if m.MsgType == 2 { // message type 2 is data (messages)
 			if verbose {
 				log.Printf("[ipc] Client Received, data: %v\n", m.Data)
 			}
-			response := decodeToCommand(m.Data)
+			response := decodeToMessage(m.Data)
 			ipc_response <- response
 		}
 	}
@@ -211,8 +194,8 @@ func encodeToBytes(p interface{}) []byte {
 	return buf.Bytes()
 }
 
-func decodeToCommand(input []byte) Command {
-	cmd := Command{}
+func decodeToMessage(input []byte) Message {
+	cmd := Message{}
 	dec := gob.NewDecoder(bytes.NewReader(input))
 	err := dec.Decode(&cmd)
 	if err != nil {
