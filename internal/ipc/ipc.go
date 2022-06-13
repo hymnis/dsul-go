@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/hymnis/dsul-go/internal/settings"
-	ipc "github.com/james-barrow/golang-ipc"
+	ipc "github.com/hymnis/golang-ipc"
 )
 
 var verbose bool = false
