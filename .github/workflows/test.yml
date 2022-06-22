@@ -87,6 +87,7 @@ jobs:
         shell: bash
 
       - name: Build arm64
+        if: matrix.os != 'macOS-latest'
         run: |
           CURRENT_OS=$(go env GOOS)
           GOARCH=arm64 go build -v -ldflags "-X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o dsuld-arm64-$CURRENT_OS ./cmd/dsuld/main.go
