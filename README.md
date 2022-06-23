@@ -57,6 +57,7 @@ As binary: `dsuld [arguments]`
     -h, --help                 Show help and usage information.
     -c, --comport <comport>    The COM port to use. [default: /dev/ttyUSB0]
     -b, --baudrate <baudrate>  The baudrate to use with the COM port. [default: 38400]
+    -n  --network              Enable network mode.
     -p  --password <password>  Set password.
     -v, --version              Show current version.
     --verbose                  Show more detailed output.
@@ -77,6 +78,7 @@ As binary: `dsulc [arguments]`
     -m, --mode <mode>              Set mode to given value (must be on of the predefined modes).
     -d, --dim                      Turn on color dimming.
     -u, --undim                    Turn off color dimming.
+    -n  --network <server>         Network server to connect to.
     -p  --password <password>      Set password.
     -v, --version                  Show current version.
     --verbose                      Show more detailed output.

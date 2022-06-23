@@ -298,7 +298,7 @@ func Runner(cfg *settings.Config, verbosity bool, cmd_channel chan string, rsp_c
 }
 
 func commandHandler(port serial.Port, cmd_channel chan string, rsp_channel chan string, cfg *settings.Config) {
-	pinger := watchdog.NewChannelTimer(time.Second * 30) // make sure watchdog send ping every 58 if no other commands have been sent
+	pinger := watchdog.NewChannelTimer(time.Second * 30) // make sure watchdog send ping every 30 seconds if no other commands have been sent
 
 	for {
 		select {

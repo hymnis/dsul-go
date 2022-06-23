@@ -29,6 +29,11 @@ type Serial struct {
 	Port     string
 	Baudrate int
 }
+type Network struct {
+	Listen bool
+	Server string
+	Port   int
+}
 type Config struct {
 	Colors        []Color
 	Modes         []Mode
@@ -36,6 +41,7 @@ type Config struct {
 	BrightnessMax int
 	Serial        Serial
 	Password      string
+	Network       Network
 }
 
 type Hardware struct {
@@ -94,7 +100,12 @@ func getDefaults() Config {
 		BrightnessMin: 0,
 		BrightnessMax: 150,
 		Serial:        Serial{"/dev/ttyUSB0", 38400},
-		Password:      "",
+		Network: Network{
+			Listen: false,
+			Server: "",
+			Port:   9292,
+		},
+		Password: "",
 	}
 	return config
 }
