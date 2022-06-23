@@ -91,6 +91,9 @@ func handleArguments(cfg *settings.Config) []ipc.Message {
 	arg_undim := parser.Flag("u", "undim", &argparse.Options{
 		Required: false,
 		Help:     "Un-dim colors"})
+	arg_network := parser.String("n", "network", &argparse.Options{
+		Required: false,
+		Help:     "Network server to connect to"})
 	arg_password := parser.String("p", "password", &argparse.Options{
 		Required: false,
 		Validate: func(args []string) error {
@@ -127,6 +130,12 @@ func handleArguments(cfg *settings.Config) []ipc.Message {
 	if *arg_version {
 		fmt.Printf("dsulc v%s\n", version)
 		os.Exit(0)
+	}
+	if *arg_network != "" {
+		if verbose {
+			log.Printf("[dsulc] Using network mode. Connecting to: %s (%d)\n", *arg_network, cfg.Network.Port)
+		}
+		cfg.Network.Server = *arg_network
 	}
 	if *arg_password != "" {
 		if verbose {

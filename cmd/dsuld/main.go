@@ -61,6 +61,10 @@ func handleArguments(cfg *settings.Config) {
 			return nil
 		},
 		Help: "Set COM port baudrate"})
+	//arg_network := parser.String("n", "network", &argparse.Options{
+	arg_network := parser.Flag("n", "network", &argparse.Options{
+		Required: false,
+		Help:     "Enable network mode"})
 	arg_password := parser.String("p", "password", &argparse.Options{
 		Required: false,
 		Validate: func(args []string) error {
@@ -106,6 +110,12 @@ func handleArguments(cfg *settings.Config) {
 			log.Printf("[dsuld] Set COM port baudrate: %d\n", *arg_baudrate)
 		}
 		cfg.Serial.Baudrate = *arg_baudrate
+	}
+	if *arg_network {
+		if verbose {
+			log.Printf("[dsuld] Using network mode. Listening on port: %d\n", cfg.Network.Port)
+		}
+		cfg.Network.Listen = *arg_network
 	}
 	if *arg_password != "" {
 		if verbose {

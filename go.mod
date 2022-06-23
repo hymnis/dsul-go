@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/akamensky/argparse v1.3.1
-	github.com/hymnis/golang-ipc v1.1.3-rc1
+	github.com/hymnis/golang-ipc v1.1.3
 	github.com/tucnak/store v0.0.0-20170905113834-b02ecdcc6dfb
 	go.bug.st/serial v1.3.3
 )

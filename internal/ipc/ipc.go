@@ -26,7 +26,17 @@ type Message struct {
 // Start runner for IPC server.
 func ServerRunner(cfg *settings.Config, verbosity bool, cmd_channel chan string, rsp_channel chan string) {
 	verbose = verbosity
-	sc, err := ipc.StartServer("dsul", nil)
+	sc_config := &ipc.ServerConfig{
+		Network: false,
+	}
+
+	if cfg.Network.Listen {
+		sc_config = &ipc.ServerConfig{
+			Network:     true,
+			NetworkPort: cfg.Network.Port,
+		}
+	}
+	sc, err := ipc.StartServer("dsul", sc_config)
 	if err != nil {
 		log.Println(err)
 		return
@@ -107,10 +117,21 @@ func responseHandler(rsp_channel chan string, out_channel chan Message) {
 
 func ClientRunner(cfg *settings.Config, verbosity bool, ipc_message chan Message, ipc_response chan Message, done chan bool) {
 	verbose = verbosity
-	conf := &ipc.ClientConfig{
+	cc_config := &ipc.ClientConfig{
+		Network: false,
 		Timeout: 5,
 	}
-	cc, err := ipc.StartClient("dsul", conf)
+
+	if cfg.Network.Server != "" {
+		cc_config = &ipc.ClientConfig{
+			Network:       true,
+			NetworkPort:   cfg.Network.Port,
+			NetworkServer: cfg.Network.Server,
+			Timeout:       5,
+		}
+	}
+
+	cc, err := ipc.StartClient("dsul", cc_config)
 	if err != nil {
 		log.Println(err)
 		return
