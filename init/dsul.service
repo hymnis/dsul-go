@@ -1,0 +1,18 @@
+[Unit]
+Description=DSUL service
+BindsTo=dev-dsul.device
+After=dev-dsul.device
+
+[Service]
+Type=exec
+Restart=always
+
+# with default path
+ExecStart=/usr/bin/dsuld -c /dev/dsul
+
+# with custom path
+WorkingDirectory=path/to/dsul-go
+ExecStart=path/to/dsul-go/dsuld -c /dev/dsul
+
+[Install]
+WantedBy=multi-user.target
