@@ -111,9 +111,16 @@ func getDefaults() Config {
 }
 
 func guaranteeConfigFile() {
-	_, err := os.OpenFile(buildPath("dsul.yml"), os.O_RDONLY|os.O_CREATE, 0644)
-	if err != nil {
-		log.Fatal(err)
+	// Make sure directories exists
+	err1 := os.MkdirAll(buildPath(""), os.ModePerm)
+	if err1 != nil {
+		log.Fatal(err1)
+	}
+
+	// Make sure config file exists
+	_, err2 := os.OpenFile(buildPath("dsul.yml"), os.O_RDONLY|os.O_CREATE, 0644)
+	if err2 != nil {
+		log.Fatal(err2)
 	}
 }
 
