@@ -61,6 +61,7 @@ As binary: `dsuld [arguments]`
     -p  --password <password>  Set password.
     -v, --version              Show current version.
     --verbose                  Show more detailed output.
+    --debug                    Show debug output.
 
 
 ## CLI client, dsulc
@@ -82,6 +83,7 @@ As binary: `dsulc [arguments]`
     -p  --password <password>      Set password.
     -v, --version                  Show current version.
     --verbose                      Show more detailed output.
+    --debug                        Show debug output.
 
 
 ## Development
