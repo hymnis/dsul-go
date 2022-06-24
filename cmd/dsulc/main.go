@@ -19,6 +19,7 @@ var (
 	sha1          string
 	buildTime     string
 	verbose       bool   = false
+	debug         bool   = false
 	hardware_info string = ""
 )
 
@@ -27,12 +28,20 @@ func main() {
 	cfg := settings.GetSettings()
 	cmd_list := handleArguments(cfg)
 
+	output_handling := struct {
+		Verbose bool
+		Debug   bool
+	}{
+		Verbose: verbose,
+		Debug:   debug,
+	}
+
 	// Start runners
 	ipc_message := make(chan ipc.Message)
 	ipc_response := make(chan ipc.Message)
 	done := make(chan bool)
-	go ipc.ClientRunner(cfg, verbose, ipc_message, ipc_response, done) // act on IPC message's given and send 'done' signal all are sent
-	go handleResponse(cfg, ipc_response)                               // handle responses from IPC daemon
+	go ipc.ClientRunner(cfg, output_handling, ipc_message, ipc_response, done) // act on IPC message's given and send 'done' signal all are sent
+	go handleResponse(cfg, ipc_response)                                       // handle responses from IPC daemon
 
 	sendMessages(cmd_list, ipc_message) // send IPC message's (to channel ipc_message)
 	close(ipc_message)                  // close channel once we are done sending messages
@@ -111,6 +120,9 @@ func handleArguments(cfg *settings.Config) []ipc.Message {
 	arg_verbose := parser.Flag("", "verbose", &argparse.Options{
 		Required: false,
 		Help:     "Show verbose output"})
+	arg_debug := parser.Flag("", "debug", &argparse.Options{
+		Required: false,
+		Help:     "Show debug output"})
 
 	err := parser.Parse(os.Args)
 	if err != nil {
@@ -123,6 +135,11 @@ func handleArguments(cfg *settings.Config) []ipc.Message {
 	actions := 0
 	var cmd_list []ipc.Message
 
+	if *arg_debug {
+		debug = true
+		verbose = true
+		log.Println("[dsulc] Debug mode is on")
+	}
 	if *arg_verbose {
 		verbose = true
 		log.Println("[dsulc] Verbose mode is on")
