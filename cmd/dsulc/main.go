@@ -1,4 +1,14 @@
-// DSUL - Disturb State USB Light : Client application.
+/*
+DSUL - Disturb State USB Light : Client application
+
+dsulc is the client part of the DSUL project.
+It handles communication with the server via IPC and sends user commands.
+
+Usage:
+
+    dsulc [arguments]
+
+*/
 package main
 
 import (
@@ -23,8 +33,10 @@ var (
 	hardware_info string = ""
 )
 
+// main runs the main loop and runners for IPC.
 func main() {
 	// Get settings and cmd_list from arguments
+
 	cfg := settings.GetSettings()
 	cmd_list := handleArguments(cfg)
 
@@ -37,6 +49,7 @@ func main() {
 	}
 
 	// Start runners
+
 	ipc_message := make(chan ipc.Message)
 	ipc_response := make(chan ipc.Message)
 	done := make(chan bool)
@@ -49,7 +62,7 @@ func main() {
 	<-done // run until 'done' signal is received
 }
 
-// Parse command line arguments and prepare IPC messages.
+// handleArguments parses command line arguments and prepares IPC messages (actions) to send.
 func handleArguments(cfg *settings.Config) []ipc.Message {
 	parser := argparse.NewParser("dsulc", "Disturb State USB Light - CLI")
 
@@ -127,11 +140,13 @@ func handleArguments(cfg *settings.Config) []ipc.Message {
 	err := parser.Parse(os.Args)
 	if err != nil {
 		// This can also be done by passing -h or --help
+
 		fmt.Print(parser.Usage(err))
 		os.Exit(1)
 	}
 
 	// Handle arguments
+
 	actions := 0
 	var cmd_list []ipc.Message
 
@@ -204,6 +219,7 @@ func handleArguments(cfg *settings.Config) []ipc.Message {
 	}
 
 	// Handle actions
+
 	if actions == 0 {
 		fmt.Print(parser.Usage(nil))
 		os.Exit(1)
@@ -212,7 +228,7 @@ func handleArguments(cfg *settings.Config) []ipc.Message {
 	return cmd_list
 }
 
-// Send prepared IPC messages to ipc_message channel.
+// sendMessages sends prepared IPC messages to ipc_message channel.
 func sendMessages(cmd_list []ipc.Message, ipc_message chan ipc.Message) {
 	for _, cmd := range cmd_list {
 		ipc_message <- cmd
@@ -220,7 +236,7 @@ func sendMessages(cmd_list []ipc.Message, ipc_message chan ipc.Message) {
 	time.Sleep(time.Second * 1) // give server time to respond
 }
 
-// Handle responses from IPC daemon.
+// handleResponse handles responses from IPC daemon.
 func handleResponse(cfg *settings.Config, ipc_response chan ipc.Message) {
 	for {
 		select {
@@ -230,6 +246,7 @@ func handleResponse(cfg *settings.Config, ipc_response chan ipc.Message) {
 			}
 			if len(response.Value) > 4 {
 				// Update settings values from hardware limits
+
 				hardware_info = response.Value
 				hardware_state := *settings.ParseHardwareInformation(hardware_info)
 				if hardware_state.Brightness_min >= 0 {
@@ -247,7 +264,7 @@ func handleResponse(cfg *settings.Config, ipc_response chan ipc.Message) {
 	}
 }
 
-// Show information about configuration settings and current hardware values.
+// showInformation reads configuration settings and current hardware values and prints them.
 func showInformation(cfg *settings.Config) {
 	hardware_state := *settings.ParseHardwareInformation(hardware_info)
 

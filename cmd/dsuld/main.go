@@ -1,4 +1,14 @@
-// DSUL - Disturb State USB Light : Daemon application.
+/*
+DSUL - Disturb State USB Light : Daemon application
+
+dsuld is the daemon/server part of the DSUL project.
+It handles communication with the serial device and client via IPC.
+
+Usage:
+
+    dsuld [arguments]
+
+*/
 package main
 
 import (
@@ -22,8 +32,10 @@ var (
 	debug     bool = false
 )
 
+// main runs the main loop and runners for serial handling and IPC.
 func main() {
 	// Get settings and arguments
+
 	cfg := settings.GetSettings()
 	handleArguments(cfg)
 
@@ -36,6 +48,7 @@ func main() {
 	}
 
 	// Start runners
+
 	cmd_channel := make(chan string) // commands to serial device
 	rsp_channel := make(chan string) // response from serial device
 	go serial.Runner(cfg, output_handling, cmd_channel, rsp_channel)
@@ -44,8 +57,10 @@ func main() {
 	select {} // run until user exits
 }
 
-// Parse command line arguments .
+// handleArguments parses command line arguments and performs actions based on them.
 func handleArguments(cfg *settings.Config) {
+	// Parse arguments
+
 	parser := argparse.NewParser("dsuld", "Disturb State USB Light - Daemon")
 
 	arg_comport := parser.String("c", "comport", &argparse.Options{
@@ -103,6 +118,7 @@ func handleArguments(cfg *settings.Config) {
 	}
 
 	// Handle arguments
+
 	if *arg_debug {
 		debug = true
 		verbose = true

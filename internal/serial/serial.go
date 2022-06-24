@@ -1,4 +1,4 @@
-// DSUL - Disturb State USB Light : Serial module.
+// DSUL - Disturb State USB Light : Serial module
 package serial
 
 import (
@@ -18,7 +18,7 @@ var (
 	debug   bool = false
 )
 
-// Initialize serial port.
+// Init starts the initialization of the serial device.
 func Init(cfg *settings.Config) serial.Port {
 	mode := &serial.Mode{
 		BaudRate: cfg.Serial.Baudrate,
@@ -39,7 +39,7 @@ func Init(cfg *settings.Config) serial.Port {
 	return port
 }
 
-// Read serial port and return data.
+// Read receives serial data from given port and returns it.
 func Read(port serial.Port) string {
 	buff := make([]byte, 64)
 	output := ""
@@ -71,6 +71,7 @@ func Read(port serial.Port) string {
 		}
 
 		// Clear buffer before next run
+
 		for j := range buff {
 			buff[j] = 0
 		}
@@ -79,7 +80,7 @@ func Read(port serial.Port) string {
 	return ""
 }
 
-// Write data to serial port.
+// Write sends serial data to given port.
 func Write(port serial.Port, data []byte) {
 	if debug {
 		log.Printf("[serial] Sending: '%s' %v\n", data, data)
@@ -90,25 +91,25 @@ func Write(port serial.Port, data []byte) {
 	}
 }
 
-// Send OK to device.
+// SendOK sends an OK message to device on given port.
 func SendOK(port serial.Port) bool {
 	Write(port, []byte("+!#"))
 	return true
 }
 
-// Send ping to device.
+// SendPing sends a ping message to device on given port.
 func SendPing(port serial.Port) bool {
 	result := performExchange(port, "-?#")
 	return isOK(result)
 }
 
-// Send request for information to device.
+// SendRequest sends a request for information to device on given port.
 func SendRequest(port serial.Port) string {
 	result := performExchange(port, "-!#")
 	return result
 }
 
-// Send command to set the color.
+// SendColorCommand sends a command to set given color to device on given port.
 // ???:???:??? - red:green:blue values, 0-255
 func SendColorCommand(port serial.Port, value string, cfg *settings.Config) bool {
 	command, ok := GetColorString(value, cfg)
@@ -126,7 +127,7 @@ func SendColorCommand(port serial.Port, value string, cfg *settings.Config) bool
 	return false
 }
 
-// Send command to set the brightness.
+// SendBrightnessCommand sends a command to set given brightness to device on given port.
 // ??? - brightness value, 0-255
 func SendBrightnessCommand(port serial.Port, value string, cfg *settings.Config) bool {
 	command, ok := GetBrightnessString(value, cfg)
@@ -144,7 +145,7 @@ func SendBrightnessCommand(port serial.Port, value string, cfg *settings.Config)
 	return false
 }
 
-// Send command to set the mode.
+// SendModeCommand sends a command to set given mode to device on given port.
 // ??? - mode value, 0-4
 func SendModeCommand(port serial.Port, value string, cfg *settings.Config) bool {
 	command, ok := GetModeString(value, cfg)
@@ -162,7 +163,7 @@ func SendModeCommand(port serial.Port, value string, cfg *settings.Config) bool 
 	return false
 }
 
-// Send command to set the dim mode.
+// SendDimCommand sends a command to set the given dim mode to device on given port.
 // 0 = No dimming (turn off dim mode)
 // 1 = Dimming (turn on dim mode)
 func SendDimCommand(port serial.Port, value string) bool {
@@ -181,14 +182,14 @@ func SendDimCommand(port serial.Port, value string) bool {
 	return false
 }
 
-// Send data and receive data in return.
+// performExchange sends data and receives data in return from device on given port.
 func performExchange(port serial.Port, data string) string {
 	Write(port, []byte(data))
 	value := Read(port)
 	return value
 }
 
-// Return a bool value indicating if data is (a) OK.
+// isOK returns a boolean value indicating if data is (a) OK.
 func isOK(data string) bool {
 	// TODO: fix proper string checks
 	status := false
@@ -200,7 +201,7 @@ func isOK(data string) bool {
 	return status
 }
 
-// Return a string ready to send to serial device, for changing LED color.
+// GetColorString returns a string ready to send to serial device, for changing LED color.
 func GetColorString(value string, cfg *settings.Config) (string, bool) {
 	command := ""
 	ok := false
@@ -227,7 +228,7 @@ func GetColorString(value string, cfg *settings.Config) (string, bool) {
 	return command, ok
 }
 
-// Return a string ready to send to serial device, for setting LED brightness.
+// GetBrightnessString returns a string ready to send to serial device, for setting LED brightness.
 func GetBrightnessString(value string, cfg *settings.Config) (string, bool) {
 	command := ""
 	ok := false
@@ -241,7 +242,7 @@ func GetBrightnessString(value string, cfg *settings.Config) (string, bool) {
 	return command, ok
 }
 
-// Return a string ready to send to serial device, for setting display mode.
+// GetModeString returns a string ready to send to serial device, for setting display mode.
 func GetModeString(value string, cfg *settings.Config) (string, bool) {
 	command := ""
 	ok := false
@@ -256,7 +257,7 @@ func GetModeString(value string, cfg *settings.Config) (string, bool) {
 	return command, ok
 }
 
-// Return a string ready to send to serial device, for dimming LED.
+// GetDimString returns a string ready to send to serial device, for dimming LED.
 func GetDimString(value string) (string, bool) {
 	command := ""
 	ok := false
@@ -270,7 +271,7 @@ func GetDimString(value string) (string, bool) {
 	return command, ok
 }
 
-// Get and parse hardware information, updating settings if needed and returning information.
+// updateHardwareInformation gets and parses hardware information, updating settings if needed and returns the information.
 func updateHardwareInformation(port serial.Port, cfg *settings.Config) string {
 	hardware_info := SendRequest(port)
 	hardware_state := *settings.ParseHardwareInformation(hardware_info)
@@ -287,7 +288,7 @@ func updateHardwareInformation(port serial.Port, cfg *settings.Config) string {
 
 // Runner parts //
 
-// Start runner for serial communication.
+// Runner set ups the serial communication handler.
 // Handles reading and writing in different goroutines.
 func Runner(cfg *settings.Config, output_handling struct {
 	Verbose bool
@@ -304,6 +305,7 @@ func Runner(cfg *settings.Config, output_handling struct {
 	select {}
 }
 
+// commandHandler receives incoming commands and calls the appropriate serial functions.
 func commandHandler(port serial.Port, cmd_channel chan string, rsp_channel chan string, cfg *settings.Config) {
 	pinger := watchdog.NewChannelTimer(time.Second * 30) // make sure watchdog send ping every 30 seconds if no other commands have been sent
 

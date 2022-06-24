@@ -1,4 +1,4 @@
-// DSUL - Disturb State USB Light : IPC module.
+// DSUL - Disturb State USB Light : IPC module
 package ipc
 
 import (
@@ -17,6 +17,7 @@ var (
 	debug   bool = false
 )
 
+// Message to send between IPC nodes.
 type Message struct {
 	Type   string
 	Key    string
@@ -26,7 +27,7 @@ type Message struct {
 
 // Runner parts //
 
-// Start runner for IPC server.
+// ServerRunner starts runner for IPC server.
 func ServerRunner(cfg *settings.Config, output_handling struct {
 	Verbose bool
 	Debug   bool
@@ -57,6 +58,7 @@ func ServerRunner(cfg *settings.Config, output_handling struct {
 	select {}
 }
 
+// serverSend takes a message from out channel and sends it over the active connection.
 func serverSend(sc *ipc.Server, out_channel chan Message) {
 	for {
 		select {
@@ -72,6 +74,7 @@ func serverSend(sc *ipc.Server, out_channel chan Message) {
 	}
 }
 
+// serverReceive handles the received data from the active connection.
 func serverReceive(cfg *settings.Config, sc *ipc.Server, cmd_channel chan string, out_channel chan Message) {
 	for {
 		m, err := sc.Read()
@@ -112,7 +115,7 @@ func serverReceive(cfg *settings.Config, sc *ipc.Server, cmd_channel chan string
 	}
 }
 
-// Handles responses from serial device.
+// responseHandler routes response messages from serial device to out channel.
 func responseHandler(rsp_channel chan string, out_channel chan Message) {
 	for {
 		select {
@@ -122,6 +125,7 @@ func responseHandler(rsp_channel chan string, out_channel chan Message) {
 	}
 }
 
+// ClientRunner starts runner for the IPC client.
 func ClientRunner(cfg *settings.Config, output_handling struct {
 	Verbose bool
 	Debug   bool
@@ -155,6 +159,7 @@ func ClientRunner(cfg *settings.Config, output_handling struct {
 	select {}
 }
 
+// clientSend takes a message and sends it over the active connection.
 func clientSend(cc *ipc.Client, ready chan bool, ipc_message chan Message, done chan bool) {
 	select {
 	case <-ready:
@@ -179,6 +184,7 @@ func clientSend(cc *ipc.Client, ready chan bool, ipc_message chan Message, done 
 	}
 }
 
+// clientReceive handles the received data from the active connection.
 func clientReceive(cc *ipc.Client, ready chan bool, ipc_response chan Message) {
 	for {
 		m, err := cc.Read()
@@ -216,6 +222,7 @@ func clientReceive(cc *ipc.Client, ready chan bool, ipc_response chan Message) {
 	}
 }
 
+// encodeToBytes takes and interfacee and returns it as byte string.
 func encodeToBytes(p interface{}) []byte {
 	buf := bytes.Buffer{}
 	enc := gob.NewEncoder(&buf)
@@ -226,6 +233,7 @@ func encodeToBytes(p interface{}) []byte {
 	return buf.Bytes()
 }
 
+// decodeToMessage takes a byte string and returns a Message.
 func decodeToMessage(input []byte) Message {
 	cmd := Message{}
 	dec := gob.NewDecoder(bytes.NewReader(input))
@@ -236,6 +244,7 @@ func decodeToMessage(input []byte) Message {
 	return cmd
 }
 
+// decodeToString takes a byte string and returns a string.
 func decodeToString(input []byte) string {
 	str := ""
 	dec := gob.NewDecoder(bytes.NewReader(input))

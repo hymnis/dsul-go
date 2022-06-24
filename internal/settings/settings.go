@@ -1,4 +1,4 @@
-// DSUL - Disturb State USB Light : Settings module.
+// DSUL - Disturb State USB Light : Settings module
 package settings
 
 import (
@@ -55,6 +55,7 @@ type Hardware struct {
 	Current_dim        int
 }
 
+// GetSettings returns the settings from the config file or defaults.
 func GetSettings() *Config {
 	cfg := getDefaults()
 
@@ -68,6 +69,7 @@ func GetSettings() *Config {
 	return &cfg
 }
 
+// SaveSettings saves the settings to the config file.
 func SaveSettings(cfg *Config) {
 	store.Init(applicationName)
 	guaranteeConfigFile()
@@ -76,6 +78,7 @@ func SaveSettings(cfg *Config) {
 	}
 }
 
+// getDefaults returns the default settings as a Config struct.
 func getDefaults() Config {
 	config := Config{
 		Colors: []Color{
@@ -110,20 +113,25 @@ func getDefaults() Config {
 	return config
 }
 
+// guaranteeConfigFile ensures that the config file exists.
 func guaranteeConfigFile() {
 	// Make sure directories exists
+
 	err1 := os.MkdirAll(buildPath(""), os.ModePerm)
 	if err1 != nil {
 		log.Fatal(err1)
 	}
 
 	// Make sure config file exists
+
 	_, err2 := os.OpenFile(buildPath("dsul.yml"), os.O_RDONLY|os.O_CREATE, 0644)
 	if err2 != nil {
 		log.Fatal(err2)
 	}
 }
 
+// buildPath returns the path to the given file path.
+// The path is dependant on the OS.
 func buildPath(path string) string {
 	if runtime.GOOS == "windows" {
 		return fmt.Sprintf("%s\\%s\\%s", os.Getenv("APPDATA"),
@@ -143,7 +151,7 @@ func buildPath(path string) string {
 		path)
 }
 
-// Parse information from harware and return a hardware struct.
+// ParseHardwareInformation returns a Hardware struct containing the current hardware information.
 func ParseHardwareInformation(info string) *Hardware {
 	hardware_info := Hardware{}
 
