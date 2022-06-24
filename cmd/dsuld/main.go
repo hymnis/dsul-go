@@ -19,6 +19,7 @@ var (
 	sha1      string
 	buildTime string
 	verbose   bool = false
+	debug     bool = false
 )
 
 func main() {
@@ -26,11 +27,19 @@ func main() {
 	cfg := settings.GetSettings()
 	handleArguments(cfg)
 
+	output_handling := struct {
+		Verbose bool
+		Debug   bool
+	}{
+		Verbose: verbose,
+		Debug:   debug,
+	}
+
 	// Start runners
 	cmd_channel := make(chan string) // commands to serial device
 	rsp_channel := make(chan string) // response from serial device
-	go serial.Runner(cfg, verbose, cmd_channel, rsp_channel)
-	go ipc.ServerRunner(cfg, verbose, cmd_channel, rsp_channel)
+	go serial.Runner(cfg, output_handling, cmd_channel, rsp_channel)
+	go ipc.ServerRunner(cfg, output_handling, cmd_channel, rsp_channel)
 
 	select {} // run until user exits
 }
@@ -82,6 +91,9 @@ func handleArguments(cfg *settings.Config) {
 	arg_verbose := parser.Flag("", "verbose", &argparse.Options{
 		Required: false,
 		Help:     "Show verbose output"})
+	arg_debug := parser.Flag("", "debug", &argparse.Options{
+		Required: false,
+		Help:     "Show debug output"})
 
 	err := parser.Parse(os.Args)
 	if err != nil {
@@ -91,6 +103,11 @@ func handleArguments(cfg *settings.Config) {
 	}
 
 	// Handle arguments
+	if *arg_debug {
+		debug = true
+		verbose = true
+		log.Println("[dsuld] Debug mode is on")
+	}
 	if *arg_verbose {
 		verbose = true
 		log.Println("[dsuld] Verbose mode is on")

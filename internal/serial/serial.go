@@ -13,7 +13,10 @@ import (
 	"go.bug.st/serial"
 )
 
-var verbose bool = false
+var (
+	verbose bool = false
+	debug   bool = false
+)
 
 // Initialize serial port.
 func Init(cfg *settings.Config) serial.Port {
@@ -51,7 +54,7 @@ func Read(port serial.Port) string {
 			break
 		}
 
-		if verbose {
+		if debug {
 			log.Printf("[serial] Receiving: '%s' %v\n", buff, buff)
 		}
 		for _, ch := range buff {
@@ -78,7 +81,7 @@ func Read(port serial.Port) string {
 
 // Write data to serial port.
 func Write(port serial.Port, data []byte) {
-	if verbose {
+	if debug {
 		log.Printf("[serial] Sending: '%s' %v\n", data, data)
 	}
 	_, err := port.Write(data)
@@ -286,8 +289,12 @@ func updateHardwareInformation(port serial.Port, cfg *settings.Config) string {
 
 // Start runner for serial communication.
 // Handles reading and writing in different goroutines.
-func Runner(cfg *settings.Config, verbosity bool, cmd_channel chan string, rsp_channel chan string) {
-	verbose = verbosity
+func Runner(cfg *settings.Config, output_handling struct {
+	Verbose bool
+	Debug   bool
+}, cmd_channel chan string, rsp_channel chan string) {
+	verbose = output_handling.Verbose
+	debug = output_handling.Debug
 	port := Init(cfg)
 	_ = SendPing(port)
 	_ = updateHardwareInformation(port, cfg)

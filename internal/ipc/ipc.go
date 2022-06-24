@@ -12,7 +12,10 @@ import (
 	ipc "github.com/hymnis/golang-ipc"
 )
 
-var verbose bool = false
+var (
+	verbose bool = false
+	debug   bool = false
+)
 
 type Message struct {
 	Type   string
@@ -24,8 +27,12 @@ type Message struct {
 // Runner parts //
 
 // Start runner for IPC server.
-func ServerRunner(cfg *settings.Config, verbosity bool, cmd_channel chan string, rsp_channel chan string) {
-	verbose = verbosity
+func ServerRunner(cfg *settings.Config, output_handling struct {
+	Verbose bool
+	Debug   bool
+}, cmd_channel chan string, rsp_channel chan string) {
+	verbose = output_handling.Verbose
+	debug = output_handling.Debug
 	sc_config := &ipc.ServerConfig{
 		Network: false,
 	}
@@ -57,7 +64,7 @@ func serverSend(sc *ipc.Server, out_channel chan Message) {
 			msg_str := encodeToBytes(message)
 			msg_type := 2 // 2 == data
 			_ = sc.Write(msg_type, msg_str)
-			if verbose {
+			if debug {
 				log.Printf("[ipc] Server Sent: %v\n", msg_str)
 			}
 			time.Sleep(time.Second / 30)
@@ -71,12 +78,12 @@ func serverReceive(cfg *settings.Config, sc *ipc.Server, cmd_channel chan string
 
 		if err == nil {
 			if m.MsgType == 1 {
-				if verbose {
+				if debug {
 					log.Printf("[ipc] Server Received, auth: %v\n", m.Data)
 				}
 			}
 			if m.MsgType == 2 {
-				if verbose {
+				if debug {
 					log.Printf("[ipc] Server Received, data: %v\n", m.Data)
 				}
 				cmd := decodeToMessage(m.Data)
@@ -115,8 +122,12 @@ func responseHandler(rsp_channel chan string, out_channel chan Message) {
 	}
 }
 
-func ClientRunner(cfg *settings.Config, verbosity bool, ipc_message chan Message, ipc_response chan Message, done chan bool) {
-	verbose = verbosity
+func ClientRunner(cfg *settings.Config, output_handling struct {
+	Verbose bool
+	Debug   bool
+}, ipc_message chan Message, ipc_response chan Message, done chan bool) {
+	verbose = output_handling.Verbose
+	debug = output_handling.Debug
 	cc_config := &ipc.ClientConfig{
 		Network: false,
 		Timeout: 5,
@@ -155,7 +166,7 @@ func clientSend(cc *ipc.Client, ready chan bool, ipc_message chan Message, done 
 					msg_str := encodeToBytes(message)
 					msg_type := 2 // 2 == data
 					_ = cc.Write(msg_type, msg_str)
-					if verbose {
+					if debug {
 						log.Printf("[ipc] Client Sent, data: %v\n", msg_str)
 					}
 					time.Sleep(time.Second / 30)
@@ -190,13 +201,13 @@ func clientReceive(cc *ipc.Client, ready chan bool, ipc_response chan Message) {
 
 		if m.MsgType == 1 { // message type 1 is authentication
 			// ...
-			if verbose {
+			if debug {
 				log.Printf("[ipc] Client Received, auth: %v\n", m.Data)
 			}
 		}
 
 		if m.MsgType == 2 { // message type 2 is data (messages)
-			if verbose {
+			if debug {
 				log.Printf("[ipc] Client Received, data: %v\n", m.Data)
 			}
 			response := decodeToMessage(m.Data)
