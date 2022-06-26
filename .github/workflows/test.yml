@@ -7,7 +7,6 @@ on:
     paths-ignore:
       - '**.md'
       - '**.sh'
-      - '**.yml'
       - '**.yaml'
   pull_request:
     branches:
@@ -16,13 +15,77 @@ on:
     paths-ignore:
       - '**.md'
       - '**.sh'
-      - '**.yml'
       - '**.yaml'
   workflow_dispatch:
 
 jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+
+      - name: Build dsuld
+        run: |
+          # dsuld
+          version=$(head -1 ./cmd/dsuld/VERSION)
+          sha1=$(git rev-parse HEAD)
+          build_time=$(date +'%Y-%m-%d_%T')
+
+          # linux
+          CURRENT_OS='linux'
+          GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o dsuld_${version}-amd64-${CURRENT_OS} ./cmd/dsuld/main.go
+          GOOS=$CURRENT_OS GOARCH=386 go build -v -ldflags "-X main.version=${version} -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=${build_time}" -o dsuld_${version}-386-${CURRENT_OS} ./cmd/dsuld/main.go
+          GOOS=$CURRENT_OS GOARCH=arm64 go build -v -ldflags "-X main.version=${version} -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=${build_time}" -o dsuld_${version}-arm64-${CURRENT_OS} ./cmd/dsuld/main.go
+          GOOS=$CURRENT_OS GOARCH=arm go build -v -ldflags "-X main.version=${version} -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=${build_time}" -o dsuld_${version}-arm-${CURRENT_OS} ./cmd/dsuld/main.go
+
+          # darwin
+          CURRENT_OS='darwin'
+          GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o dsuld_${version}-amd64-${CURRENT_OS} ./cmd/dsuld/main.go
+
+          # windows
+          CURRENT_OS='windows'
+          GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o dsuld_${version}-amd64-${CURRENT_OS} ./cmd/dsuld/main.go
+          GOOS=$CURRENT_OS GOARCH=386 go build -v -ldflags "-X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o dsuld_${version}-386-${CURRENT_OS} ./cmd/dsuld/main.go
+        shell: bash
+
+      - name: Build dsulc
+        run: |
+          # dsulc
+          version=$(head -1 ./cmd/dsulc/VERSION)
+          sha1=$(git rev-parse HEAD)
+          build_time=$(date +'%Y-%m-%d_%T')
+
+          # linux
+          CURRENT_OS='linux'
+          GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o dsulc_${version}-amd64-${CURRENT_OS} ./cmd/dsulc/main.go
+          GOOS=$CURRENT_OS GOARCH=386 go build -v -ldflags "-X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o dsulc_${version}-386-${CURRENT_OS} ./cmd/dsulc/main.go
+          GOOS=$CURRENT_OS GOARCH=arm64 go build -v -ldflags "-X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o dsulc_${version}-arm64-${CURRENT_OS} ./cmd/dsulc/main.go
+          GOOS=$CURRENT_OS GOARCH=arm go build -v -ldflags "-X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o dsulc_${version}-arm-${CURRENT_OS} ./cmd/dsulc/main.go
+
+          # darwin
+          CURRENT_OS='darwin'
+          GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o dsulc_${version}-amd64-${CURRENT_OS} ./cmd/dsulc/main.go
+
+          # windows
+          CURRENT_OS='windows'
+          GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o dsulc_${version}-amd64-${CURRENT_OS} ./cmd/dsulc/main.go
+          GOOS=$CURRENT_OS GOARCH=386 go build -v -ldflags "-X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o dsulc_${version}-386-${CURRENT_OS} ./cmd/dsulc/main.go
+        shell: bash
+
+      - name: Finished
+        run: |
+          echo ":hammer: Build complete!" >> $GITHUB_STEP_SUMMARY
+
   test:
     name: Run tests
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -55,53 +118,6 @@ jobs:
           name: coverage
           path: ./coverage.*
 
-  build:
-    name: Build
-    needs: test
-    strategy:
-     matrix:
-       os: [ ubuntu-latest, windows-latest, macOS-latest ]
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.17
-
-      - name: Build amd64
+      - name: Finished
         run: |
-          CURRENT_OS=$(go env GOOS)
-          GOARCH=amd64 go build -v -ldflags "-X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o dsuld-amd64-$CURRENT_OS ./cmd/dsuld/main.go
-          GOARCH=amd64 go build -v -ldflags "-X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o dsulc-amd64-$CURRENT_OS ./cmd/dsulc/main.go
-        shell: bash
-
-      - name: Build 386
-        if: matrix.os != 'macOS-latest'
-        run: |
-          CURRENT_OS=$(go env GOOS)
-          GOARCH=386 go build -v -ldflags "-X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o dsuld-386-$CURRENT_OS ./cmd/dsuld/main.go
-          GOARCH=386 go build -v -ldflags "-X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o dsulc-386-$CURRENT_OS ./cmd/dsulc/main.go
-        shell: bash
-
-      - name: Build arm64
-        if: matrix.os != 'macOS-latest'
-        run: |
-          CURRENT_OS=$(go env GOOS)
-          GOARCH=arm64 go build -v -ldflags "-X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o dsuld-arm64-$CURRENT_OS ./cmd/dsuld/main.go
-          GOARCH=arm64 go build -v -ldflags "-X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o dsulc-arm64-$CURRENT_OS ./cmd/dsulc/main.go
-        shell: bash
-
-      - name: Build arm
-        if: matrix.os != 'macOS-latest'
-        run: |
-          CURRENT_OS=$(go env GOOS)
-          GOARCH=arm go build -v -ldflags "-X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o dsuld-arm-$CURRENT_OS ./cmd/dsuld/main.go
-          GOARCH=arm go build -v -ldflags "-X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o dsulc-arm-$CURRENT_OS ./cmd/dsulc/main.go
-        shell: bash
-
-      - name: Finish
-        run: |
-          echo ":rocket: Build complete!" >> $GITHUB_STEP_SUMMARY
+          echo ":microscope: Testing complete!" >> $GITHUB_STEP_SUMMARY
