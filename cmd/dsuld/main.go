@@ -65,15 +65,7 @@ func handleArguments(cfg *settings.Config) {
 
 	arg_comport := parser.String("c", "comport", &argparse.Options{
 		Required: false,
-		Validate: func(args []string) error {
-			for _, comport := range args {
-				if _, err := os.Stat(comport); !os.IsNotExist(err) {
-					return nil
-				}
-			}
-			return errors.New("COM port path incorrect or not readable.")
-		},
-		Help: "Set COM port (path)"})
+		Help:     "Set COM port (path)"})
 	arg_baudrate := parser.Int("b", "baudrate", &argparse.Options{
 		Required: false,
 		Validate: func(args []string) error {
