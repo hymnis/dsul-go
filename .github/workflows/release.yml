@@ -27,14 +27,9 @@ jobs:
       run: mkdir -p ./artifacts
       shell: bash
 
-    - name: Get changed files
-      uses: tj-actions/changed-files@v2.1
-      id: changed-files
-
     - name: Build dsuld
-      if: contains(steps.changed-files.outputs.other_changed_files, 'cmd/dsuld/main.go')
       run: |
-        # DSULD
+        # dsuld
 
         # linux
         CURRENT_OS='linux'
@@ -54,9 +49,8 @@ jobs:
       shell: bash
 
     - name: Build dsulc
-      if: contains(steps.changed-files.outputs.other_changed_files, 'cmd/dsulc/main.go')
       run: |
-        # DSULD
+        # dsulc
 
         # linux
         CURRENT_OS='linux'
