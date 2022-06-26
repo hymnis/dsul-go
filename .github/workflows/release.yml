@@ -30,43 +30,49 @@ jobs:
     - name: Build dsuld
       run: |
         # dsuld
+        version=$(head -1 ./cmd/dsuld/VERSION)
+        sha1=$(git rev-parse HEAD)
+        build_time=$(date +'%Y-%m-%d_%T')
 
         # linux
         CURRENT_OS='linux'
-        GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-s -w -X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsuld-amd64-$CURRENT_OS ./cmd/dsuld/main.go
-        GOOS=$CURRENT_OS GOARCH=386 go build -v -ldflags "-s -w -X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsuld-386-$CURRENT_OS ./cmd/dsuld/main.go
-        GOOS=$CURRENT_OS GOARCH=arm64 go build -v -ldflags "-s -w -X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsuld-arm64-$CURRENT_OS ./cmd/dsuld/main.go
-        GOOS=$CURRENT_OS GOARCH=arm go build -v -ldflags "-s -w -X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsuld-arm-$CURRENT_OS ./cmd/dsuld/main.go
+        GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-s -w -X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o ./artifacts/dsuld_${version}-amd64-${CURRENT_OS} ./cmd/dsuld/main.go
+        GOOS=$CURRENT_OS GOARCH=386 go build -v -ldflags "-s -w -X main.version=${version} -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=${build_time}" -o ./artifacts/dsuld_${version}-386-${CURRENT_OS} ./cmd/dsuld/main.go
+        GOOS=$CURRENT_OS GOARCH=arm64 go build -v -ldflags "-s -w -X main.version=${version} -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=${build_time}" -o ./artifacts/dsuld_${version}-arm64-${CURRENT_OS} ./cmd/dsuld/main.go
+        GOOS=$CURRENT_OS GOARCH=arm go build -v -ldflags "-s -w -X main.version=${version} -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=${build_time}" -o ./artifacts/dsuld_${version}-arm-${CURRENT_OS} ./cmd/dsuld/main.go
 
         # darwin
         CURRENT_OS='darwin'
-        GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-s -w -X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsuld-amd64-$CURRENT_OS ./cmd/dsuld/main.go
+        GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-s -w -X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o ./artifacts/dsuld_${version}-amd64-${CURRENT_OS} ./cmd/dsuld/main.go
 
         # windows
         CURRENT_OS='windows'
-        GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-s -w -X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsuld-amd64-$CURRENT_OS ./cmd/dsuld/main.go
-        GOOS=$CURRENT_OS GOARCH=386 go build -v -ldflags "-s -w -X main.version=$(head -1 ./cmd/dsuld/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsuld-386-$CURRENT_OS ./cmd/dsuld/main.go
+        GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-s -w -X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o ./artifacts/dsuld_${version}-amd64-${CURRENT_OS} ./cmd/dsuld/main.go
+        GOOS=$CURRENT_OS GOARCH=386 go build -v -ldflags "-s -w -X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o ./artifacts/dsuld_${version}-386-${CURRENT_OS} ./cmd/dsuld/main.go
       shell: bash
 
     - name: Build dsulc
       run: |
         # dsulc
+        version=$(head -1 ./cmd/dsulc/VERSION)
+        sha1=$(git rev-parse HEAD)
+        build_time=$(date +'%Y-%m-%d_%T')
 
         # linux
         CURRENT_OS='linux'
-        GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-s -w -X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsulc-amd64-$CURRENT_OS ./cmd/dsulc/main.go
-        GOOS=$CURRENT_OS GOARCH=386 go build -v -ldflags "-s -w -X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsulc-386-$CURRENT_OS ./cmd/dsulc/main.go
-        GOOS=$CURRENT_OS GOARCH=arm64 go build -v -ldflags "-s -w -X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsulc-arm64-$CURRENT_OS ./cmd/dsulc/main.go
-        GOOS=$CURRENT_OS GOARCH=arm go build -v -ldflags "-s -w -X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsulc-arm-$CURRENT_OS ./cmd/dsulc/main.go
+        GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-s -w -X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o ./artifacts/dsulc_${version}-amd64-${CURRENT_OS} ./cmd/dsulc/main.go
+        GOOS=$CURRENT_OS GOARCH=386 go build -v -ldflags "-s -w -X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o ./artifacts/dsulc_${version}-386-${CURRENT_OS} ./cmd/dsulc/main.go
+        GOOS=$CURRENT_OS GOARCH=arm64 go build -v -ldflags "-s -w -X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o ./artifacts/dsulc_${version}-arm64-${CURRENT_OS} ./cmd/dsulc/main.go
+        GOOS=$CURRENT_OS GOARCH=arm go build -v -ldflags "-s -w -X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o ./artifacts/dsulc_${version}-arm-${CURRENT_OS} ./cmd/dsulc/main.go
 
         # darwin
         CURRENT_OS='darwin'
-        GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-s -w -X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsulc-amd64-$CURRENT_OS ./cmd/dsulc/main.go
+        GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-s -w -X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o ./artifacts/dsulc_${version}-amd64-${CURRENT_OS} ./cmd/dsulc/main.go
 
         # windows
         CURRENT_OS='windows'
-        GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-s -w -X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsulc-amd64-$CURRENT_OS ./cmd/dsulc/main.go
-        GOOS=$CURRENT_OS GOARCH=386 go build -v -ldflags "-s -w -X main.version=$(head -1 ./cmd/dsulc/VERSION) -X main.sha1=$(git rev-parse HEAD) -X main.buildTime=$(date +'%Y-%m-%d_%T')" -o ./artifacts/dsulc-386-$CURRENT_OS ./cmd/dsulc/main.go
+        GOOS=$CURRENT_OS GOARCH=amd64 go build -v -ldflags "-s -w -X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o ./artifacts/dsulc_${version}-amd64-${CURRENT_OS} ./cmd/dsulc/main.go
+        GOOS=$CURRENT_OS GOARCH=386 go build -v -ldflags "-s -w -X main.version=${version} -X main.sha1=${sha1} -X main.buildTime=${build_time}" -o ./artifacts/dsulc_${version}-386-${CURRENT_OS} ./cmd/dsulc/main.go
       shell: bash
 
     - name: Upload binaries
