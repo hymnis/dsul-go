@@ -26,8 +26,8 @@ import (
 
 var (
 	version       string = "0.0.0"
-	sha1          string
-	buildTime     string
+	sha1          string //lint:ignore U1000 supplied at build time
+	buildTime     string //lint:ignore U1000 supplied at build time
 	verbose       bool   = false
 	debug         bool   = false
 	hardware_info string = ""
@@ -36,7 +36,6 @@ var (
 // main runs the main loop and runners for IPC.
 func main() {
 	// Get settings and cmd_list from arguments
-
 	cfg := settings.GetSettings()
 	cmd_list := handleArguments(cfg)
 
@@ -49,11 +48,10 @@ func main() {
 	}
 
 	// Start runners
-
 	ipc_message := make(chan ipc.Message)
 	ipc_response := make(chan ipc.Message)
 	done := make(chan bool)
-	go ipc.ClientRunner(cfg, output_handling, ipc_message, ipc_response, done) // act on IPC message's given and send 'done' signal all are sent
+	go ipc.ClientRunner(cfg, output_handling, ipc_message, ipc_response, done) // act on IPC message's given and send 'done' signal when all are sent
 	go handleResponse(cfg, ipc_response)                                       // handle responses from IPC daemon
 
 	sendMessages(cmd_list, ipc_message) // send IPC message's (to channel ipc_message)
@@ -76,7 +74,7 @@ func handleArguments(cfg *settings.Config) []ipc.Message {
 					}
 				}
 			}
-			return errors.New("Color given is not supported.")
+			return errors.New("color given is not supported")
 		},
 		Help: "Set given color"})
 	arg_list := parser.Flag("l", "list", &argparse.Options{
@@ -92,7 +90,7 @@ func handleArguments(cfg *settings.Config) []ipc.Message {
 					}
 				}
 			}
-			return errors.New("Mode given is not supported.")
+			return errors.New("mode given is not supported")
 		},
 		Help: "Set given mode"})
 	arg_brightness := parser.Int("b", "brightness", &argparse.Options{
@@ -124,7 +122,7 @@ func handleArguments(cfg *settings.Config) []ipc.Message {
 					return nil
 				}
 			}
-			return errors.New("Password can't be empty.")
+			return errors.New("password can't be empty")
 		},
 		Help: "Set password"})
 	arg_version := parser.Flag("v", "version", &argparse.Options{
@@ -146,7 +144,6 @@ func handleArguments(cfg *settings.Config) []ipc.Message {
 	}
 
 	// Handle arguments
-
 	actions := 0
 	var cmd_list []ipc.Message
 
@@ -207,7 +204,7 @@ func handleArguments(cfg *settings.Config) []ipc.Message {
 		if verbose {
 			log.Print("[dsulc] Set un-dim\n")
 		}
-		cmd_list = append(cmd_list, ipc.Message{Type: "set", Key: "undim", Value: "true", Secret: cfg.Password})
+		cmd_list = append(cmd_list, ipc.Message{Type: "set", Key: "dim", Value: "false", Secret: cfg.Password})
 		actions += 1
 	}
 	if *arg_color != "" {
@@ -219,7 +216,6 @@ func handleArguments(cfg *settings.Config) []ipc.Message {
 	}
 
 	// Handle actions
-
 	if actions == 0 {
 		fmt.Print(parser.Usage(nil))
 		os.Exit(1)
@@ -238,6 +234,7 @@ func sendMessages(cmd_list []ipc.Message, ipc_message chan ipc.Message) {
 
 // handleResponse handles responses from IPC daemon.
 func handleResponse(cfg *settings.Config, ipc_response chan ipc.Message) {
+	//lint:ignore S1000 using select statement on loop to handle incoming data
 	for {
 		select {
 		case response := <-ipc_response:

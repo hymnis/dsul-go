@@ -15,14 +15,16 @@ This implementation uses Go for both daemon/server and client. It should work on
 
 The hardware used is an Arduino connected to a NeoPixel module. The project was developed using an Arduino Nano, but should work on most models as long as the firmware fit and it has enough RAM for the number of LED's used in the module.
 
-The firmware project is available at [hymnis/dsul-arduino](https://github.com/hymnis/dsul-arduino).
+The firmware projects are available at:
+- [hymnis/dsul-arduino](https://github.com/hymnis/dsul-arduino)
+- [hymnis/dsul-rp2040](https://github.com/hymnis/dsul-rp2040)
 
 
 ## Firmware
 
-As both FW (firmware) and SW (software) needs to talk to each other, not all combinations of versions work. Make sure that the FW and SW versions are compatible with each other. The latest (stable) versions usually has the best support. For more information about compatibility, see the [Firmware](https://github.com/hymnis/dsul-go/wiki/Firmware) wiki page.
+As both FW (firmware) and SW (software) needs to talk to each other, not all combinations of versions work. Make sure that the FW and SW versions are compatible with each other. The latest (stable) versions usually has the best support. For more information about compatibility, see the [Arduino firmware](https://github.com/hymnis/dsul-go/wiki/Firmware) wiki page.
 
-Specifications on the serial protocol and messages can be found in the [firmware](https://github.com/hymnis/dsul-arduino) repository.
+Specifications on the serial protocol and messages can be found in both the [Arduino firmware](https://github.com/hymnis/dsul-arduino) and [RP2040 firmware](https://github.com/hymnis/dsul-rp2040) repositories.
 
 
 ## Other implementations
@@ -105,6 +107,8 @@ All Go code should be formatted by `gofmt`. If it's not it will be caught by the
 
 ### Linting, checks and test
 Tests are located in the module directory. They should be named according to format: `<module name>_test.go`
+
+The program (cmd) modules also use Gingko and test suites and there should be a `<module name>_suite_test.go` and a `main_test.go` file for each module.
 
 To check the code itself we use `go vet`.
 

@@ -26,16 +26,15 @@ import (
 
 var (
 	version   string = "0.0.0"
-	sha1      string
-	buildTime string
-	verbose   bool = false
-	debug     bool = false
+	sha1      string //lint:ignore U1000 supplied at build time
+	buildTime string //lint:ignore U1000 supplied at build time
+	verbose   bool   = false
+	debug     bool   = false
 )
 
 // main runs the main loop and runners for serial handling and IPC.
 func main() {
 	// Get settings and arguments
-
 	cfg := settings.GetSettings()
 	handleArguments(cfg)
 
@@ -48,7 +47,6 @@ func main() {
 	}
 
 	// Start runners
-
 	cmd_channel := make(chan string) // commands to serial device
 	rsp_channel := make(chan string) // response from serial device
 	go serial.Runner(cfg, output_handling, cmd_channel, rsp_channel)
@@ -60,7 +58,6 @@ func main() {
 // handleArguments parses command line arguments and performs actions based on them.
 func handleArguments(cfg *settings.Config) {
 	// Parse arguments
-
 	parser := argparse.NewParser("dsuld", "Disturb State USB Light - Daemon")
 
 	arg_comport := parser.String("c", "comport", &argparse.Options{
@@ -70,8 +67,8 @@ func handleArguments(cfg *settings.Config) {
 		Required: false,
 		Validate: func(args []string) error {
 			for _, baudrate := range args {
-				if n, err := strconv.Atoi(baudrate); err != nil || int(n) < 9600 || int(n) > 38400 {
-					return errors.New("Baudrate is outside allowed range (9600-38400).")
+				if n, err := strconv.Atoi(baudrate); err != nil || int(n) < 9600 || int(n) > 115200 {
+					return errors.New("baudrate is outside allowed range (9600-115200)")
 				}
 			}
 			return nil
@@ -89,7 +86,7 @@ func handleArguments(cfg *settings.Config) {
 					return nil
 				}
 			}
-			return errors.New("Password can't be empty.")
+			return errors.New("password can't be empty")
 		},
 		Help: "Set password"})
 	arg_version := parser.Flag("v", "version", &argparse.Options{
@@ -110,7 +107,6 @@ func handleArguments(cfg *settings.Config) {
 	}
 
 	// Handle arguments
-
 	if *arg_debug {
 		debug = true
 		verbose = true
